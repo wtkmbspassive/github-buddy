@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Friendly GitHub Upload Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+  :root{
+    --bg:#1a1614; --bg2:#211c19; --surface:#2a2420; --surface2:#332b26;
+    --line:#3d342e; --ink:#f4ece3; --ink2:#cbb8a3; --ink3:#9a8975;
+    --accent:#e8985e; --accent2:#f0b27a; --gold:#d9a441;
+    --green:#7fa86a; --rose:#cc7b6a; --blue:#7b9bb5;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:'Newsreader',Georgia,serif; font-size:18px; line-height:1.65;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(232,152,94,.06), transparent 42%),
+      radial-gradient(circle at 88% 22%, rgba(217,164,65,.05), transparent 38%);
+    background-attachment:fixed; padding-bottom:7rem;
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:0 1.4rem;}
+
+  /* ── Header ── */
+  header{padding:4.5rem 0 2.5rem;text-align:center;position:relative;}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.32em;
+    text-transform:uppercase;color:var(--accent);margin-bottom:1.4rem;}
+  h1{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.6rem,7vw,4.4rem);
+    line-height:1.02;letter-spacing:-.02em;margin-bottom:1.1rem;color:var(--ink);}
+  h1 em{font-style:italic;color:var(--accent);}
+  .sub{font-size:1.15rem;color:var(--ink2);max-width:540px;margin:0 auto;font-style:italic;}
+  .deco-line{width:60px;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);
+    margin:2.2rem auto 0;}
+
+  /* ── Reassuring intro banner (post-setup) ── */
+  .intro-banner{
+    background:linear-gradient(135deg,rgba(127,168,106,.12),rgba(217,164,65,.08));
+    border:1px solid var(--line);border-left:3px solid var(--green);
+    border-radius:0 16px 16px 0;padding:1.5rem 1.7rem;margin:2.5rem 0 1rem;
+  }
+  .intro-banner .ib-hi{font-family:'Fraunces',serif;font-weight:600;font-size:1.25rem;
+    color:var(--ink);margin-bottom:.5rem;}
+  .intro-banner p{color:var(--ink2);font-size:1rem;margin:0;}
+  .intro-banner b{color:var(--accent2);}
+
+  /* ── Project-name pill (editable, prefilled) ── */
+  .namebox{
+    background:linear-gradient(135deg,var(--surface),var(--bg2));
+    border:1px solid var(--line);border-radius:18px;padding:1.8rem 1.9rem;
+    margin:1.4rem 0 3rem;box-shadow:0 18px 50px -28px rgba(0,0,0,.7);
+    position:relative;overflow:hidden;
+  }
+  .namebox::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--accent),var(--gold),var(--accent));}
+  .namebox label{display:block;font-family:'JetBrains Mono',monospace;font-size:.68rem;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:.7rem;}
+  .name-row{display:flex;gap:.7rem;align-items:stretch;flex-wrap:wrap;}
+  .namebox input{
+    flex:1;min-width:220px;background:var(--bg);border:1px solid var(--line);border-radius:10px;
+    color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:1.05rem;
+    padding:.85rem 1rem;outline:none;transition:border-color .2s, box-shadow .2s;
+  }
+  .namebox input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,152,94,.14);}
+  .namebox input.locked{background:rgba(127,168,106,.08);border-color:rgba(127,168,106,.4);
+    color:var(--green);font-weight:700;}
+  .name-edit-btn{
+    font-family:'JetBrains Mono',monospace;font-size:.74rem;font-weight:700;letter-spacing:.04em;
+    background:var(--surface2);border:1px solid var(--line);color:var(--ink2);
+    border-radius:10px;padding:.5rem 1rem;cursor:pointer;transition:all .16s;white-space:nowrap;
+  }
+  .name-edit-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .namebox .hint{font-size:.92rem;color:var(--ink3);margin-top:.85rem;line-height:1.55;}
+  .slug-preview{margin-top:1rem;padding:.75rem 1rem;background:var(--bg);border:1px dashed var(--line);
+    border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--ink2);display:none;}
+  .slug-preview.show{display:block;}
+  .slug-preview b{color:var(--green);}
+
+  /* legend explaining how prompts work */
+  .legend{background:linear-gradient(135deg,var(--surface),var(--bg2));border:1px solid var(--line);
+    border-radius:16px;padding:1.3rem 1.5rem;margin:0 0 2rem;}
+  .legend-hi{font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem;color:var(--ink);
+    margin-bottom:1rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+  .badge-demo{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+    font-weight:700;color:var(--green);background:rgba(127,168,106,.14);border:1px solid rgba(127,168,106,.4);
+    border-radius:999px;padding:.2rem .6rem;}
+  .legend-rows{display:flex;flex-direction:column;gap:.85rem;}
+  .legend-row{display:flex;align-items:center;gap:.9rem;}
+  .legend-swatch{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;}
+  .legend-swatch.green{background:rgba(127,168,106,.14);border-radius:4px;padding:.15rem .5rem;}
+  .legend-swatch.green .swatch-text{color:var(--green);font-weight:700;background:rgba(127,168,106,.14);
+    border-bottom:1px dotted rgba(232,152,94,.45);font-family:'JetBrains Mono',monospace;font-size:.78rem;}
+  .legend-swatch.copy{font-family:'JetBrains Mono',monospace;font-size:.66rem;background:var(--accent);
+    color:#1a1614;border:none;padding:.35rem .7rem;border-radius:7px;font-weight:700;letter-spacing:.04em;}
+  .legend-txt{font-size:.92rem;color:var(--ink2);line-height:1.45;}
+  .legend-txt b{color:var(--ink);}
+  .legend-swatch-inline.grey{color:var(--ink3);font-style:italic;border-bottom:1px dotted rgba(154,137,117,.5);
+    font-family:'JetBrains Mono',monospace;font-size:.82em;padding:0 .15em;}
+
+  /* ── TOC ── */
+  .toc{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:2rem;justify-content:center;}
+  .toc a{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.04em;
+    color:var(--ink2);text-decoration:none;padding:.4rem .8rem;border:1px solid var(--line);
+    border-radius:999px;transition:all .18s;}
+  .toc a:hover{border-color:var(--accent);color:var(--accent);background:rgba(232,152,94,.07);}
+
+  /* ── Step blocks ── */
+  .step{background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    margin-bottom:1.5rem;overflow:hidden;transition:border-color .2s;}
+  .step:hover{border-color:#4a4038;}
+  .step-hdr{display:flex;align-items:center;gap:1.1rem;padding:1.5rem 1.8rem;cursor:pointer;user-select:none;}
+  .step-num{flex-shrink:0;width:46px;height:46px;border-radius:13px;
+    background:linear-gradient(135deg,var(--accent),var(--gold));color:#1a1614;
+    font-family:'Fraunces',serif;font-weight:900;font-size:1.3rem;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px -8px rgba(232,152,94,.5);
+    transition:all .25s;}
+  .step.done .step-num{background:linear-gradient(135deg,var(--green),#9bc285);}
+  .step.done .step-num::after{content:'✓';position:absolute;}
+  .step.done .step-num span{display:none;}
+  .step-title{flex:1;font-family:'Fraunces',serif;font-weight:600;font-size:1.35rem;letter-spacing:-.01em;}
+  .step-title small{display:block;font-family:'Newsreader',serif;font-style:italic;font-size:.92rem;
+    color:var(--ink3);font-weight:400;margin-top:.15rem;}
+  .chevron{flex-shrink:0;font-family:'JetBrains Mono',monospace;color:var(--ink3);
+    transition:transform .35s cubic-bezier(.16,1,.3,1);font-size:1.1rem;}
+  .step.open .chevron{transform:rotate(90deg);color:var(--accent);}
+  .step-body{display:none;padding:0 1.8rem 2rem;}
+  .step.open .step-body{display:block;animation:expandIn .6s cubic-bezier(.16,1,.3,1);}
+  /* optional step — dashed border + badge, so it reads as skippable */
+  .step.is-optional{border-style:dashed;border-color:#4a4038;}
+  .step.is-optional .step-num{background:linear-gradient(135deg,#6b5d52,#8a7866);box-shadow:none;}
+  .step.is-optional.done .step-num{background:linear-gradient(135deg,var(--green),#9bc285);}
+  .opt-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.12em;
+    text-transform:uppercase;font-weight:700;color:var(--ink3);background:var(--surface);
+    border:1px solid var(--line);border-radius:999px;padding:.15rem .55rem;margin-left:.5rem;vertical-align:middle;}
+  /* in-flow reassurance banner */
+  .reassure-banner{display:flex;align-items:center;gap:1rem;cursor:pointer;
+    background:linear-gradient(135deg,rgba(123,155,181,.12),rgba(127,168,106,.08));
+    border:1px solid var(--line);border-left:3px solid var(--blue);border-radius:0 14px 14px 0;
+    padding:1.1rem 1.4rem;margin:0 0 1.5rem;transition:all .18s;}
+  .reassure-banner:hover{border-left-color:#a3c0d6;background:linear-gradient(135deg,rgba(123,155,181,.18),rgba(127,168,106,.1));transform:translateX(2px);}
+  .reassure-banner .rb-ico{flex-shrink:0;font-size:1.5rem;}
+  .reassure-banner .rb-txt{font-size:.96rem;color:var(--ink2);line-height:1.5;}
+  .reassure-banner .rb-txt b{color:var(--ink);}
+  .reassure-banner .rb-link{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;
+    color:var(--blue);letter-spacing:.03em;white-space:nowrap;}
+  @keyframes expandIn{
+    from{opacity:0;transform:translateY(-10px);}
+    to{opacity:1;transform:none;}
+  }
+  /* a step that just auto-opened gets a slow glow so the user notices it — NO transform (keeps layout stable) */
+  .step.just-opened{animation:stepPulse 2.2s cubic-bezier(.4,0,.2,1);}
+  @keyframes stepPulse{
+    0%{box-shadow:0 0 0 0 rgba(232,152,94,0); border-color:var(--line);}
+    25%{box-shadow:0 0 0 4px rgba(232,152,94,.5), 0 18px 50px -20px rgba(232,152,94,.35); border-color:var(--accent);}
+    100%{box-shadow:0 0 0 0 rgba(232,152,94,0); border-color:var(--line);}
+  }
+  .step.just-opened .step-num{animation:numPop 1.1s cubic-bezier(.16,1,.3,1);}
+  @keyframes numPop{0%{transform:scale(1);}35%{transform:scale(1.16) rotate(-4deg);}100%{transform:scale(1);}}
+
+  .step-body h4{font-family:'Fraunces',serif;font-weight:600;font-size:1.08rem;
+    margin:1.6rem 0 .7rem;color:var(--accent2);}
+  .step-body p{margin-bottom:.9rem;color:var(--ink2);}
+  .step-body ol,.step-body ul{margin:0 0 1rem 1.3rem;color:var(--ink2);}
+  .step-body li{margin-bottom:.7rem;padding-left:.2rem;}
+  .step-body li::marker{color:var(--accent);}
+
+  /* tooltips */
+  .term{border-bottom:1.5px dotted var(--accent);cursor:help;position:relative;
+    color:var(--accent2);font-style:normal;font-weight:500;}
+  .term .tip{visibility:hidden;opacity:0;position:absolute;bottom:140%;left:50%;
+    transform:translateX(-50%) translateY(6px);width:min(280px,76vw);background:#100d0b;
+    border:1px solid var(--accent);border-radius:11px;padding:.75rem .9rem;
+    font-family:'Newsreader',serif;font-style:normal;font-size:.86rem;line-height:1.5;
+    color:var(--ink);z-index:30;transition:all .2s;box-shadow:0 16px 40px -12px rgba(0,0,0,.8);pointer-events:none;}
+  .term .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+    border:7px solid transparent;border-top-color:var(--accent);}
+  .term:hover .tip{visibility:visible;opacity:1;transform:translateX(-50%) translateY(0);}
+
+  code{font-family:'JetBrains Mono',monospace;font-size:.82em;background:var(--surface);
+    border:1px solid var(--line);padding:.12rem .42rem;border-radius:6px;color:var(--accent2);}
+  .btn-ref{font-family:'JetBrains Mono',monospace;font-size:.78em;background:var(--surface2);
+    border:1px solid #4a4038;padding:.1rem .5rem;border-radius:6px;color:var(--ink);font-weight:500;white-space:nowrap;}
+  .proj{color:var(--green);font-weight:600;font-family:'JetBrains Mono',monospace;font-size:.86em;}
+
+  /* callout boxes — now with a clear "info, not a task" marker */
+  .note{border-left:3px solid var(--blue);background:rgba(123,155,181,.08);
+    border-radius:0 12px 12px 0;padding:1rem 1.2rem;margin:1.2rem 0;font-size:.96rem;color:var(--ink2);}
+  .note.warn{border-left-color:var(--gold);background:rgba(217,164,65,.08);}
+  .note.tip{border-left-color:var(--green);background:rgba(127,168,106,.08);}
+  .note b{color:var(--ink);}
+  .note .lbl{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.16em;
+    text-transform:uppercase;display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;font-weight:700;}
+  .note.warn .lbl{color:var(--gold);} .note .lbl{color:var(--blue);} .note.tip .lbl{color:var(--green);}
+  .note .lbl::before{font-family:'Newsreader',serif;font-size:1.1em;letter-spacing:0;text-transform:none;}
+  .note .lbl[data-kind="info"]::before{content:'ⓘ';}
+  .note .lbl[data-kind="safe"]::before{content:'✓';}
+  .note .lbl[data-kind="watch"]::before{content:'⚠';}
+  .note-skim{font-family:'Newsreader',serif;font-style:italic;font-size:.78rem;color:var(--ink3);
+    text-transform:none;letter-spacing:0;font-weight:400;margin-left:auto;}
+
+  /* AI prompt blocks */
+  .prompt{background:linear-gradient(135deg,#13100e,#1a1512);border:1px solid var(--line);
+    border-radius:14px;margin:1.3rem 0;overflow:hidden;}
+  .prompt-hdr{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.1rem;
+    background:rgba(232,152,94,.08);border-bottom:1px solid var(--line);}
+  .prompt-hdr span{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--accent);font-weight:700;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;}
+  .copy-btn{font-family:'JetBrains Mono',monospace;font-size:.68rem;background:var(--accent);
+    color:#1a1614;border:none;padding:.4rem .8rem;border-radius:7px;cursor:pointer;font-weight:700;
+    letter-spacing:.04em;transition:all .15s;white-space:nowrap;}
+  .copy-btn:hover{background:var(--accent2);transform:translateY(-1px);}
+  .copy-btn.copied{background:var(--green);}
+  .prompt-body{padding:1.1rem 1.2rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;
+    line-height:1.7;color:var(--ink2);white-space:pre-wrap;word-break:break-word;}
+  /* unfilled placeholder: muted, clearly an example you CAN fill (not a demand) */
+  .prompt-body .fill{color:var(--ink3);font-weight:400;font-style:italic;opacity:.85;}
+  .fill.is-filled{color:var(--green);background:rgba(127,168,106,.14);border-radius:4px;padding:0 .25em;
+    font-weight:700;font-style:normal;opacity:1;}
+  .proj.is-filled{background:rgba(127,168,106,.12);border-radius:4px;padding:0 .25em;}
+  /* inline-editable values — subtle dotted cue when unfilled, clearer when filled */
+  .fill.editable,[data-proj].editable,.userfill.editable{cursor:text;outline:none;
+    border-bottom:1px dotted rgba(154,137,117,.5);transition:all .15s;border-radius:4px;position:relative;}
+  .fill.is-filled.editable,[data-proj].is-filled.editable,.userfill.is-filled.editable{
+    border-bottom:1px dashed rgba(127,168,106,.6);}
+  .fill.editable:hover,[data-proj].editable:hover,.userfill.editable:hover{background:rgba(232,152,94,.16);
+    border-bottom-color:var(--accent);}
+  .fill.editable:hover::after,[data-proj].editable:hover::after{content:'✎ click to edit';font-size:.62em;
+    font-style:normal;margin-left:.4em;opacity:.85;color:var(--accent);font-family:'JetBrains Mono',monospace;
+    letter-spacing:.03em;white-space:nowrap;}
+  .fill.is-filled.editable:hover::after,[data-proj].is-filled.editable:hover::after{content:'✎';}
+  .fill.editable:focus,[data-proj].editable:focus,.userfill.editable:focus{background:rgba(232,152,94,.24);
+    box-shadow:0 0 0 2px rgba(232,152,94,.5);font-style:normal;color:var(--ink);}
+  .fill.editable:focus::after,[data-proj].editable:focus::after{content:'';}
+
+  /* in-prompt hint bar — injected above every pre-filled prompt body */
+  .prompt-edithint{display:flex;align-items:flex-start;gap:.55rem;padding:.6rem 1.1rem;
+    background:rgba(127,168,106,.08);border-bottom:1px solid var(--line);
+    font-family:'Newsreader',serif;font-size:.84rem;line-height:1.45;color:var(--ink2);}
+  .prompt-edithint .peh-ico{flex-shrink:0;font-size:.95rem;line-height:1.4;}
+  .prompt-edithint b{color:var(--green);}
+  .prompt-edithint .peh-or{color:var(--accent2);}
+
+  .edit-hint{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--ink3);background:var(--surface);border:1px solid var(--line);
+    border-radius:999px;padding:.2rem .6rem;display:inline-flex;align-items:center;gap:.35rem;}
+  .edit-hint b{color:var(--green);}
+
+  .ready-badge{display:none;align-items:center;gap:.4rem;font-family:'JetBrains Mono',monospace;
+    font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);
+    background:rgba(127,168,106,.14);border:1px solid rgba(127,168,106,.4);border-radius:999px;padding:.2rem .6rem;}
+  .prompt.is-ready .ready-badge{display:inline-flex;}
+
+  /* inline "ask AI for help" link, sits right at the field */
+  .ai-inline{
+    display:inline-flex;align-items:center;gap:.4rem;font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;font-weight:700;letter-spacing:.03em;color:var(--accent);
+    background:rgba(232,152,94,.1);border:1px solid rgba(232,152,94,.35);border-radius:999px;
+    padding:.25rem .7rem;cursor:pointer;transition:all .16s;text-decoration:none;
+  }
+  .ai-inline:hover{background:var(--accent);color:#1a1614;transform:translateY(-1px);}
+  .prompt.flash{animation:flash 1.8s cubic-bezier(.16,1,.3,1);}
+  @keyframes flash{0%,100%{box-shadow:none;}20%,55%{box-shadow:0 0 0 4px rgba(232,152,94,.55), 0 16px 44px -18px rgba(232,152,94,.4);}}
+
+  /* collapsible AI-prompt drawer — keeps the step's flow clean until expanded */
+  .ai-drawer{border:1px solid var(--line);border-radius:14px;margin:1.4rem 0;overflow:hidden;
+    background:rgba(232,152,94,.04);}
+  .ai-drawer>summary{list-style:none;cursor:pointer;padding:1rem 1.2rem;display:flex;align-items:center;
+    gap:.7rem;font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem;color:var(--accent2);
+    transition:background .15s;user-select:none;}
+  .ai-drawer>summary::-webkit-details-marker{display:none;}
+  .ai-drawer>summary:hover{background:rgba(232,152,94,.08);}
+  .ai-drawer>summary .ad-chev{margin-left:auto;font-family:'JetBrains Mono',monospace;color:var(--ink3);
+    transition:transform .25s;font-size:.9rem;}
+  .ai-drawer[open]>summary .ad-chev{transform:rotate(90deg);color:var(--accent);}
+  .ai-drawer>summary .ad-spark{font-size:1.1rem;}
+  .ai-drawer>summary .ad-hint{font-family:'Newsreader',serif;font-style:italic;font-weight:400;
+    font-size:.82rem;color:var(--ink3);}
+  .ai-drawer-body{padding:0 1.2rem 1.2rem;animation:expandIn .4s cubic-bezier(.16,1,.3,1);}
+  .ai-drawer.flash{animation:flash 1.8s cubic-bezier(.16,1,.3,1);}
+
+  /* sub-step "copied it, next" button */
+  .substep-next{display:inline-flex;align-items:center;gap:.5rem;margin-top:1rem;
+    font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;letter-spacing:.03em;
+    background:var(--surface2);border:1px solid var(--green);color:var(--green);
+    padding:.6rem 1.1rem;border-radius:10px;cursor:pointer;transition:all .16s;}
+  .substep-next:hover{background:var(--green);color:#1a1614;transform:translateY(-1px);}
+
+  /* attachment flag */
+  .attach-flag{display:flex;gap:.6rem;align-items:flex-start;background:rgba(217,164,65,.12);
+    border:1px solid var(--gold);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;
+    padding:.7rem .9rem;margin:.2rem 0 1rem;font-size:.9rem;color:var(--ink);line-height:1.45;}
+  .attach-flag .af-ico{font-size:1.1rem;flex-shrink:0;line-height:1.3;}
+  .attach-flag b{color:var(--gold);}
+  /* highlight an instruction the user was just scrolled to */
+  li.substep-flash{animation:liFlash 1.8s ease;border-radius:6px;}
+  @keyframes liFlash{0%,100%{background:transparent;}25%,55%{background:rgba(232,152,94,.18);}}
+
+  /* donation cards */
+  .dono-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.3rem 0;}
+  @media(max-width:560px){.dono-grid{grid-template-columns:1fr;}}
+  .dono{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:1.2rem 1.3rem;
+    text-decoration:none;color:var(--ink);transition:all .18s;display:block;}
+  .dono:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 14px 30px -16px rgba(232,152,94,.4);}
+  .dono .dn{font-family:'Fraunces',serif;font-weight:600;font-size:1.1rem;margin-bottom:.3rem;}
+  .dono .dd{font-size:.86rem;color:var(--ink3);line-height:1.5;}
+  .dono .darrow{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:.8rem;margin-top:.6rem;display:inline-block;}
+
+  .div-orn{text-align:center;margin:1.8rem 0;color:var(--line);font-size:1.2rem;letter-spacing:.5em;}
+  /* maker support card */
+  .maker-card{background:linear-gradient(135deg,rgba(232,152,94,.12),rgba(217,164,65,.07));
+    border:1px solid var(--line);border-radius:18px;padding:1.6rem 1.8rem;margin:1.5rem 0;}
+  .maker-inner{display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;}
+  .maker-text{flex:1;min-width:240px;}
+  .maker-hi{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;color:var(--ink);margin-bottom:.4rem;}
+  .maker-text p{font-size:.95rem;color:var(--ink2);margin:0;line-height:1.55;}
+  .maker-btn{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+    letter-spacing:.03em;background:linear-gradient(135deg,var(--accent),var(--gold));color:#1a1614;
+    text-decoration:none;padding:.85rem 1.5rem;border-radius:11px;transition:all .18s;
+    box-shadow:0 10px 26px -12px rgba(232,152,94,.55);}
+  .maker-btn:hover{transform:translateY(-2px);box-shadow:0 14px 32px -12px rgba(232,152,94,.7);}
+  footer{text-align:center;margin-top:4rem;padding-top:2.5rem;border-top:1px solid var(--line);
+    color:var(--ink3);font-size:.9rem;font-style:italic;}
+  footer .mono{font-family:'JetBrains Mono',monospace;font-style:normal;font-size:.8rem;letter-spacing:.05em;margin-top:.6rem;}
+  ::selection{background:var(--accent);color:#1a1614;}
+
+  /* step "mark done" checkbox row */
+  .step-done-row{display:flex;align-items:center;gap:.7rem;margin-top:1.6rem;padding-top:1.3rem;
+    border-top:1px dashed var(--line);}
+  .step-check{appearance:none;width:24px;height:24px;border-radius:7px;border:2px solid var(--line);
+    background:var(--bg);cursor:pointer;position:relative;flex-shrink:0;transition:all .18s;}
+  .step-check:hover{border-color:var(--green);}
+  .step-check:checked{background:var(--green);border-color:var(--green);}
+  .step-check:checked::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;
+    justify-content:center;color:#1a1614;font-weight:700;font-size:.9rem;font-family:'JetBrains Mono',monospace;}
+  .step-done-row label{font-family:'JetBrains Mono',monospace;font-size:.78rem;letter-spacing:.04em;
+    color:var(--ink3);cursor:pointer;}
+  .step-check:checked ~ label{color:var(--green);}
+</style>
+</head>
+<style>
+  /* ════════ ONBOARDING MODAL ════════ */
+  .modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(8,6,5,.82);backdrop-filter:blur(6px);
+    display:flex;align-items:flex-start;justify-content:center;padding:2.5rem 1.2rem;overflow-y:auto;
+    opacity:0;visibility:hidden;transition:opacity .3s ease, visibility .3s ease;}
+  .modal-overlay.show{opacity:1;visibility:visible;}
+  .modal{background:linear-gradient(160deg,var(--bg2),var(--bg));border:1px solid var(--line);
+    border-radius:22px;width:100%;max-width:660px;margin:auto;box-shadow:0 40px 120px -40px rgba(0,0,0,.9);
+    position:relative;overflow:hidden;transform:translateY(18px) scale(.98);transition:transform .35s cubic-bezier(.16,1,.3,1);}
+  .modal-overlay.show .modal{transform:none;}
+  .modal::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--accent),var(--gold),var(--accent));z-index:2;}
+  .modal-scroll{padding:2.4rem 2.2rem 2rem;}
+  @media(max-width:540px){.modal-scroll{padding:2rem 1.4rem 1.6rem;}}
+  .modal-close{position:absolute;top:1.1rem;right:1.2rem;z-index:3;width:34px;height:34px;border-radius:9px;
+    background:var(--surface);border:1px solid var(--line);color:var(--ink3);font-size:1.1rem;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:all .18s;font-family:'JetBrains Mono',monospace;}
+  .modal-close:hover{color:var(--ink);border-color:var(--accent);background:var(--surface2);}
+  .modal-kicker{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.28em;
+    text-transform:uppercase;color:var(--accent);margin-bottom:.9rem;}
+  .modal h2{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(1.7rem,4.5vw,2.3rem);
+    line-height:1.08;letter-spacing:-.02em;margin-bottom:.8rem;color:var(--ink);}
+  .modal h2 em{font-style:italic;color:var(--accent);}
+  .modal .lede{font-size:1.02rem;color:var(--ink2);margin-bottom:1.6rem;line-height:1.55;}
+  .modal .lede b{color:var(--accent2);}
+
+  .modal-progress{display:flex;align-items:center;gap:.8rem;margin-bottom:1.8rem;}
+  .pdots-row{display:flex;align-items:center;gap:.5rem;flex:1;}
+  .pstep-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.06em;
+    color:var(--ink3);white-space:nowrap;text-transform:uppercase;}
+  .pstep-label b{color:var(--accent);}
+  .pdot{height:5px;flex:1;border-radius:3px;background:var(--surface2);transition:background .3s;}
+  .pdot.active{background:linear-gradient(90deg,var(--accent),var(--gold));}
+  .pdot.done{background:var(--green);}
+
+  .branch-grid{display:grid;gap:1rem;margin-top:.4rem;}
+  .branch-card{text-align:left;width:100%;background:var(--surface);border:1px solid var(--line);
+    border-radius:15px;padding:1.4rem 1.5rem;cursor:pointer;transition:all .18s;color:var(--ink);
+    font-family:inherit;display:flex;gap:1.1rem;align-items:flex-start;}
+  .branch-card:hover{border-color:var(--accent);transform:translateY(-2px);
+    box-shadow:0 16px 36px -20px rgba(232,152,94,.45);background:var(--surface2);}
+  .branch-ico{flex-shrink:0;width:44px;height:44px;border-radius:12px;
+    background:linear-gradient(135deg,var(--accent),var(--gold));display:flex;align-items:center;
+    justify-content:center;font-size:1.4rem;}
+  .branch-card .bt{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;margin-bottom:.2rem;}
+  .branch-card .bd{font-size:.9rem;color:var(--ink3);line-height:1.5;}
+
+  .field{margin-bottom:1.3rem;}
+  .field:last-child{margin-bottom:0;}
+  .field-labelrow{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-bottom:.15rem;}
+  .field label{display:block;font-family:'Fraunces',serif;font-weight:600;font-size:1rem;color:var(--ink);}
+  .field .opt-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink3);border:1px solid var(--line);border-radius:999px;padding:.1rem .5rem;}
+  .field .flabel-sub{display:block;font-size:.85rem;color:var(--ink3);font-style:italic;margin-bottom:.55rem;line-height:1.45;}
+  .field input,.field textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;
+    color:var(--ink);font-family:'Newsreader',serif;font-size:1rem;padding:.7rem .9rem;outline:none;resize:vertical;
+    transition:border-color .2s,box-shadow .2s;}
+  .field input{font-family:'JetBrains Mono',monospace;font-size:.95rem;}
+  .field textarea{min-height:62px;line-height:1.5;}
+  .field input:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,152,94,.14);}
+  .field .micro{font-size:.8rem;color:var(--ink3);margin-top:.4rem;line-height:1.45;}
+  .field .micro b{color:var(--accent2);}
+  /* the reassurance footnote on soft questions */
+  .reassure{display:flex;gap:.5rem;align-items:flex-start;font-size:.8rem;color:var(--green);
+    margin-top:.45rem;line-height:1.45;font-style:italic;}
+  .reassure::before{content:'✦';flex-shrink:0;}
+  .modal-slug{margin-top:.5rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--ink3);}
+  .modal-slug b{color:var(--green);}
+
+  /* the AI extractor — promoted, sits near the TOP of project screen */
+  .extract-promo{background:linear-gradient(135deg,rgba(232,152,94,.12),rgba(217,164,65,.07));
+    border:1px solid rgba(232,152,94,.4);border-radius:14px;padding:1.2rem 1.3rem;margin-bottom:1.8rem;}
+  .extract-promo .ep-hi{font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem;color:var(--ink);margin-bottom:.35rem;}
+  .extract-promo p{font-size:.9rem;color:var(--ink2);margin-bottom:.7rem;line-height:1.5;}
+  .mini-extract{background:linear-gradient(135deg,#13100e,#1a1512);border:1px solid var(--line);
+    border-radius:13px;margin:.6rem 0 0;overflow:hidden;}
+  .mini-extract .me-hdr{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1rem;
+    background:rgba(232,152,94,.08);border-bottom:1px solid var(--line);}
+  .mini-extract .me-hdr span{font-family:'JetBrains Mono',monospace;font-size:.64rem;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--accent);font-weight:700;}
+  .mini-extract .me-body{padding:.9rem 1rem;font-family:'JetBrains Mono',monospace;font-size:.74rem;
+    line-height:1.65;color:var(--ink2);white-space:pre-wrap;word-break:break-word;max-height:200px;overflow-y:auto;}
+  .mini-extract .fill{color:var(--gold);font-weight:700;}
+
+  .modal-nav{display:flex;gap:.8rem;align-items:center;margin-top:1.9rem;padding-top:1.5rem;border-top:1px solid var(--line);}
+  .mbtn{font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;letter-spacing:.03em;
+    border-radius:10px;cursor:pointer;padding:.75rem 1.4rem;border:1px solid var(--line);transition:all .16s;}
+  .mbtn-primary{background:linear-gradient(135deg,var(--accent),var(--gold));color:#1a1614;border:none;flex:1;
+    box-shadow:0 10px 26px -12px rgba(232,152,94,.55);}
+  .mbtn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 32px -12px rgba(232,152,94,.7);}
+  .mbtn-ghost{background:transparent;color:var(--ink2);}
+  .mbtn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+  .mbtn-skip{background:transparent;border:none;color:var(--ink3);font-size:.78rem;text-decoration:underline;
+    text-underline-offset:3px;cursor:pointer;font-family:'JetBrains Mono',monospace;}
+  .mbtn-skip:hover{color:var(--ink2);}
+
+  .modal-steps{margin:.4rem 0 0;}
+  .mstep{display:flex;gap:.9rem;padding:.9rem 0;border-bottom:1px solid var(--line);}
+  .mstep:last-child{border-bottom:none;}
+  .mstep-n{flex-shrink:0;width:28px;height:28px;border-radius:8px;background:var(--surface2);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;color:var(--accent);}
+  .mstep-body{font-size:.94rem;color:var(--ink2);line-height:1.5;}
+  .mstep-body b{color:var(--ink);}
+  .modal code{font-family:'JetBrains Mono',monospace;font-size:.82em;background:var(--surface);
+    border:1px solid var(--line);padding:.1rem .4rem;border-radius:5px;color:var(--accent2);}
+  .modal .term{border-bottom:1.5px dotted var(--accent);cursor:help;position:relative;color:var(--accent2);font-weight:500;}
+  .modal .term .tip{visibility:hidden;opacity:0;position:absolute;bottom:140%;left:50%;
+    transform:translateX(-50%) translateY(6px);width:min(280px,72vw);background:#100d0b;border:1px solid var(--accent);
+    border-radius:11px;padding:.7rem .85rem;font-family:'Newsreader',serif;font-style:normal;font-size:.84rem;line-height:1.5;
+    color:var(--ink);z-index:40;transition:all .2s;box-shadow:0 16px 40px -12px rgba(0,0,0,.8);pointer-events:none;}
+  .modal .term .tip b{color:var(--accent2);}
+  .modal .term:hover .tip{visibility:visible;opacity:1;transform:translateX(-50%) translateY(0);}
+  .username-compare{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:.6rem 0 0;}
+  @media(max-width:480px){.username-compare{grid-template-columns:1fr;}}
+  .uc-card{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:.85rem 1rem;}
+  .uc-card .uct{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--accent);font-weight:700;margin-bottom:.3rem;}
+  .uc-card .ucd{font-size:.82rem;color:var(--ink2);line-height:1.45;}
+  .uc-card .ucex{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--green);margin-top:.35rem;display:block;}
+
+  /* ════════ FLOATING BUTTONS (bottom-right stack) ════════ */
+  .float-stack{position:fixed;bottom:1.4rem;right:1.4rem;z-index:90;display:flex;flex-direction:column;
+    gap:.7rem;align-items:flex-end;max-width:min(340px,calc(100vw - 2rem));}
+  .float-btn{font-family:'JetBrains Mono',monospace;font-size:.74rem;font-weight:700;letter-spacing:.04em;
+    background:var(--surface2);border:1px solid var(--line);color:var(--ink2);padding:.7rem 1.1rem;
+    border-radius:999px;cursor:pointer;box-shadow:0 14px 34px -16px rgba(0,0,0,.8);transition:all .18s;
+    display:flex;align-items:center;gap:.5rem;opacity:0;transform:translateY(10px);pointer-events:none;white-space:nowrap;}
+  .float-stack.show .float-btn{opacity:1;transform:none;pointer-events:auto;}
+  .float-btn:hover{transform:translateY(-2px);}
+  .float-btn.save{border-color:var(--green);color:var(--green);}
+  .float-btn.save:hover{background:var(--green);color:#1a1614;}
+  .float-progress{align-self:flex-end;font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.04em;
+    color:var(--ink2);background:var(--surface2);border:1px solid var(--line);border-radius:999px;
+    padding:.35rem .8rem;opacity:0;transform:translateY(10px);pointer-events:none;transition:all .18s;}
+  .float-stack.show .float-progress{opacity:1;transform:none;}
+  .float-progress b{color:var(--green);}
+  .float-row{display:flex;gap:.5rem;align-items:stretch;}
+  .float-row .float-btn{opacity:0;transform:translateY(10px);pointer-events:none;}
+  .float-stack.show .float-row .float-btn{opacity:1;transform:none;pointer-events:auto;}
+  .float-btn.fresh{border-color:var(--rose);color:var(--rose);}
+  .float-btn.fresh:hover{background:var(--rose);color:#1a1614;}
+  .float-btn.print{border-color:var(--gold);color:var(--gold);}
+  .float-btn.print:hover{background:var(--gold);color:#1a1614;}
+  /* larger step-styled maintenance card (floats, but reads like an optional step) */
+  .float-maint{background:var(--bg2);border:2px dashed var(--blue);border-radius:16px;
+    padding:1rem 1.1rem;cursor:pointer;box-shadow:0 18px 44px -18px rgba(0,0,0,.85);transition:all .2s;
+    display:flex;align-items:center;gap:.8rem;text-align:left;width:100%;
+    opacity:0;transform:translateY(10px);pointer-events:none;position:relative;overflow:hidden;}
+  .float-stack.show .float-maint{opacity:1;transform:none;pointer-events:auto;}
+  .float-maint:hover{border-color:#a3c0d6;background:var(--surface);transform:translateY(-2px);
+    box-shadow:0 22px 52px -20px rgba(123,155,181,.55);}
+  .float-maint::before{content:'OPTIONAL STEP';position:absolute;top:0;right:0;
+    font-family:'JetBrains Mono',monospace;font-size:.54rem;letter-spacing:.14em;color:var(--blue);
+    background:rgba(123,155,181,.14);padding:.22rem .6rem;border-radius:0 0 0 9px;font-weight:700;}
+  .float-maint .fm-ico{flex-shrink:0;width:38px;height:38px;border-radius:10px;
+    background:linear-gradient(135deg,var(--blue),#a3c0d6);display:flex;align-items:center;justify-content:center;
+    font-size:1.2rem;}
+  .float-maint .fm-txt{font-family:'Fraunces',serif;font-weight:600;font-size:1rem;line-height:1.25;color:var(--ink);}
+  .float-maint .fm-txt small{display:block;font-family:'Newsreader',serif;font-style:italic;font-size:.78rem;
+    color:var(--ink3);font-weight:400;margin-top:.15rem;}
+  @media(max-width:560px){
+    .float-maint .fm-txt{font-size:.9rem;}
+    .float-maint .fm-txt small{display:none;}
+  }
+  /* funding floater — green-themed variant */
+  .float-fund{border-color:var(--green);}
+  .float-fund:hover{border-color:#9bc285;box-shadow:0 22px 52px -20px rgba(127,168,106,.55);}
+  .float-fund::before{content:'OPTIONAL';color:var(--green);background:rgba(127,168,106,.14);}
+  .float-fund .fm-ico{background:linear-gradient(135deg,var(--green),#9bc285);}
+  /* stuck helper floater — accent-themed, always-available */
+  .float-stuck{border-color:var(--accent);border-style:solid;}
+  .float-stuck:hover{border-color:var(--accent2);box-shadow:0 22px 52px -20px rgba(232,152,94,.6);}
+  .float-stuck::before{content:'HELP, ANYTIME';color:var(--accent);background:rgba(232,152,94,.14);}
+  .float-stuck .fm-ico{background:linear-gradient(135deg,var(--accent),var(--gold));}
+  .float-stuck.breathe{animation:breatheAccent 3.6s ease-in-out infinite;}
+  @keyframes breatheAccent{
+    0%,100%{box-shadow:0 18px 44px -18px rgba(0,0,0,.85);}
+    50%{box-shadow:0 0 0 3px rgba(232,152,94,.32), 0 20px 48px -18px rgba(232,152,94,.45);}
+  }
+  /* slow continuous "breathing" so the optional floaters gently pulse and stay noticeable */
+  .float-maint.breathe{animation:breathe 3.6s ease-in-out infinite;}
+  .float-fund.breathe{animation:breatheGreen 3.6s ease-in-out infinite;}
+  @keyframes breathe{
+    0%,100%{box-shadow:0 18px 44px -18px rgba(0,0,0,.85);}
+    50%{box-shadow:0 0 0 3px rgba(123,155,181,.32), 0 20px 48px -18px rgba(123,155,181,.45);}
+  }
+  @keyframes breatheGreen{
+    0%,100%{box-shadow:0 18px 44px -18px rgba(0,0,0,.85);}
+    50%{box-shadow:0 0 0 3px rgba(127,168,106,.32), 0 20px 48px -18px rgba(127,168,106,.45);}
+  }
+  /* gentle glow when a step completes, to remind users the safety net is there */
+  .float-maint.glow{animation:maintGlow 2.6s cubic-bezier(.4,0,.2,1);}
+  @keyframes maintGlow{
+    0%{box-shadow:0 18px 44px -18px rgba(0,0,0,.85);border-color:var(--blue);}
+    20%{box-shadow:0 0 0 4px rgba(123,155,181,.5), 0 22px 52px -18px rgba(123,155,181,.6);border-color:#a3c0d6;}
+    60%{box-shadow:0 0 0 3px rgba(123,155,181,.25), 0 20px 48px -18px rgba(123,155,181,.4);border-color:#a3c0d6;}
+    100%{box-shadow:0 18px 44px -18px rgba(0,0,0,.85);border-color:var(--blue);}
+  }
+
+  /* progress tracker bar (sticky, top) */
+  .tracker{position:sticky;top:0;z-index:80;background:rgba(26,22,20,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:.7rem 0;margin-bottom:0;}
+  .tracker-inner{max-width:820px;margin:0 auto;padding:0 1.4rem;display:flex;align-items:center;gap:1rem;}
+  .tracker-bar{flex:1;height:7px;background:var(--surface2);border-radius:5px;overflow:hidden;}
+  .tracker-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--green));
+    border-radius:5px;transition:width .4s cubic-bezier(.16,1,.3,1);}
+  .tracker-label{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.05em;color:var(--ink2);white-space:nowrap;}
+  .tracker-label b{color:var(--green);}
+
+  /* prominent maintenance box (optional, after steps) */
+  .maint-box{background:var(--bg2);border:2px dashed var(--blue);border-radius:18px;
+    margin:2.5rem 0 1.5rem;overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
+  .maint-box::before{content:'OPTIONAL · FOR LATER';position:absolute;top:0;right:0;
+    font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.16em;color:var(--blue);
+    background:rgba(123,155,181,.12);padding:.3rem .8rem;border-radius:0 0 0 10px;font-weight:700;}
+  .maint-box:hover{border-color:#a3c0d6;background:var(--surface);transform:translateY(-2px);
+    box-shadow:0 16px 40px -22px rgba(123,155,181,.5);}
+  .maint-box-hdr{display:flex;align-items:center;gap:1.1rem;padding:1.5rem 1.8rem;}
+  .maint-box .step-title small{color:var(--ink3);}
+  .maint-box-arrow{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.8rem;font-weight:700;
+    letter-spacing:.04em;color:var(--blue);background:rgba(123,155,181,.12);border:1px solid var(--blue);
+    border-radius:999px;padding:.5rem 1rem;white-space:nowrap;transition:all .18s;}
+  .maint-box:hover .maint-box-arrow{background:var(--blue);color:#1a1614;}
+
+  /* completion celebration card */
+  .complete-card{background:linear-gradient(135deg,rgba(127,168,106,.16),rgba(217,164,65,.1));
+    border:1px solid var(--green);border-radius:18px;padding:2rem;text-align:center;margin:2rem 0;display:none;}
+  .complete-card.show{display:block;animation:fade .5s ease;}
+  .complete-card h3{font-family:'Fraunces',serif;font-weight:900;font-size:1.8rem;color:var(--ink);margin-bottom:.6rem;}
+  .complete-card p{color:var(--ink2);margin-bottom:0;}
+
+  /* save / reset confirmation toast */
+  .toast{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%) translateY(20px);z-index:200;
+    background:var(--surface2);border:1px solid var(--green);color:var(--ink);font-size:.9rem;
+    padding:.9rem 1.4rem;border-radius:12px;box-shadow:0 18px 44px -18px rgba(0,0,0,.9);
+    opacity:0;pointer-events:none;transition:all .3s;font-family:'Newsreader',serif;max-width:90vw;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast b{color:var(--green);}
+
+  /* ════════ PRINTABLE CHECKLIST ════════ */
+  .print-sheet{display:none;}
+  @media print{
+    /* hide the interactive guide entirely; show only the print sheet */
+    body>*{display:none !important;}
+    body{background:#fff !important;color:#111 !important;padding:0 !important;}
+    .print-sheet{display:block !important;padding:1.5rem 1.8rem;font-family:Georgia,'Times New Roman',serif;color:#111;}
+    .print-sheet h1{font-size:1.6rem;margin-bottom:.2rem;font-family:Georgia,serif;color:#111;}
+    .print-sheet .ps-sub{font-size:.95rem;color:#444;margin-bottom:1.2rem;font-style:italic;}
+    .print-sheet .ps-meta{font-size:.85rem;color:#333;margin-bottom:1.4rem;}
+    .print-sheet .ps-meta b{color:#000;}
+    .print-sheet .ps-step{border:1px solid #ccc;border-radius:8px;padding:.7rem .9rem;margin-bottom:.7rem;
+      break-inside:avoid;page-break-inside:avoid;}
+    .print-sheet .ps-step-hd{display:flex;align-items:baseline;gap:.6rem;font-size:1.05rem;font-weight:bold;margin-bottom:.2rem;}
+    .print-sheet .ps-box{display:inline-block;width:14px;height:14px;border:2px solid #555;border-radius:3px;
+      margin-right:.4rem;vertical-align:middle;}
+    .print-sheet .ps-box.checked{background:#555;position:relative;}
+    .print-sheet .ps-num{color:#666;font-size:.85rem;}
+    .print-sheet .ps-opt{font-size:.62rem;border:1px solid #999;border-radius:999px;padding:.05rem .4rem;
+      text-transform:uppercase;letter-spacing:.08em;color:#666;font-weight:normal;}
+    .print-sheet .ps-sub2{font-size:.85rem;color:#444;margin:.1rem 0 .3rem 1.6rem;font-style:italic;}
+    .print-sheet .ps-key{margin:.2rem 0 0 1.6rem;font-size:.82rem;color:#222;}
+    .print-sheet .ps-key code{font-family:'Courier New',monospace;background:#f0f0f0;border:1px solid #ddd;
+      padding:.05rem .3rem;border-radius:3px;font-size:.92em;}
+    .print-sheet .ps-foot{margin-top:1.4rem;font-size:.82rem;color:#555;border-top:1px solid #ccc;padding-top:.8rem;}
+    @page{margin:1.4cm;}
+  }
+</style>
+<body>
+
+<!-- ════════ ONBOARDING MODAL ════════ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Getting started">
+    <button class="modal-close" id="modalClose" title="Close (you can reopen anytime)">✕</button>
+    <div class="modal-scroll" id="modalScroll">
+
+      <!-- SCREEN 0: welcome / branch -->
+      <div class="mscreen" data-screen="welcome">
+        <div class="modal-kicker">Welcome — let's make this painless</div>
+        <h2>First time, or have you <em>used GitHub before?</em></h2>
+        <p class="lede">Answer a few quick questions now and the whole guide fills itself in — every step, every AI prompt, ready to copy. <b>Don't worry about perfect answers</b> — rough is fine, and an AI will polish them later.</p>
+        <div class="branch-grid">
+          <button class="branch-card" data-branch="new">
+            <div class="branch-ico">🌱</div>
+            <div><div class="bt">I'm brand new</div>
+            <div class="bd">No account yet. Walk me through creating one — username, profile, the works — then the project stuff.</div></div>
+          </button>
+          <button class="branch-card" data-branch="existing">
+            <div class="branch-ico">⚡</div>
+            <div><div class="bt">I already have GitHub</div>
+            <div class="bd">Skip account setup. Just collect my project details and fill in the guide.</div></div>
+          </button>
+        </div>
+        <div class="modal-nav" style="border-top:none;margin-top:1.4rem;padding-top:0;justify-content:center;">
+          <button class="mbtn-skip" data-action="skip-all">Skip this — just take me to the guide to upload a project</button>
+        </div>
+      </div>
+
+      <!-- SCREEN 1 (new only): create account -->
+      <div class="mscreen" data-screen="account" hidden>
+        <div class="modal-progress" data-progress></div>
+        <div class="modal-kicker">Step 1 of 3 · Create your account</div>
+        <h2>Make your <em>GitHub account</em></h2>
+        <p class="lede">About 3 minutes. Open <code>github.com</code> in another tab and follow along — then pick your username here so the guide can use it everywhere.</p>
+        <div class="modal-steps">
+          <div class="mstep"><div class="mstep-n">1</div><div class="mstep-body">Go to <code>github.com</code> and click <b>Sign up</b>.</div></div>
+          <div class="mstep"><div class="mstep-n">2</div><div class="mstep-body">Enter your <b>email</b>, a <b>password</b>, and choose a <b>username</b> (GitHub checks it's free as you type).</div></div>
+          <div class="mstep"><div class="mstep-n">3</div><div class="mstep-body">Solve the puzzle to prove you're human, then type the <b>code</b> emailed to you.</div></div>
+          <div class="mstep"><div class="mstep-n">4</div><div class="mstep-body">If asked to pick a plan, choose <b>Free</b> — it does everything in this guide.</div></div>
+        </div>
+
+        <div class="field" style="margin-top:1.6rem;">
+          <div class="field-labelrow"><label for="m_username">Your GitHub username</label></div>
+          <span class="flabel-sub">The unique <span class="term">@handle<span class="tip">Your username is your permanent address on GitHub. It can't easily be changed later and shows in every link, so pick something you'll be happy with long-term.</span></span> baked into every link you share.</span>
+          <input type="text" id="m_username" data-key="githubUsername" placeholder="e.g. jrivera" autocomplete="off" spellcheck="false">
+          <div class="username-compare">
+            <div class="uc-card"><div class="uct">Username (this field)</div><div class="ucd">Unique, permanent, lowercase. Appears in your URL.</div><span class="ucex">github.com/jrivera</span></div>
+            <div class="uc-card"><div class="uct">Display name (next screen)</div><div class="ucd">A friendly label shown on your profile. Changeable anytime, can have spaces.</div><span class="ucex">Jordan Rivera</span></div>
+          </div>
+          <div class="micro" style="margin-top:.7rem;"><b>Good username advice:</b> short, lowercase, timeless. Your name or an existing handle works great (<code>janesmith</code>, <code>jsmith</code>). Avoid years or anything tied to just this one project — this name represents <em>all</em> your future work.</div>
+        </div>
+
+        <div class="modal-nav">
+          <button class="mbtn mbtn-ghost" data-action="back">← Back</button>
+          <button class="mbtn mbtn-primary" data-action="next">Next: polish your profile →</button>
+        </div>
+      </div>
+
+      <!-- SCREEN 2 (new only): profile -->
+      <div class="mscreen" data-screen="profile" hidden>
+        <div class="modal-progress" data-progress></div>
+        <div class="modal-kicker">Step 2 of 3 · Look trustworthy</div>
+        <h2>A profile people <em>trust</em></h2>
+        <p class="lede">A blank profile looks abandoned; two minutes here makes visitors take your project seriously. <b>These are all optional and you can change them anytime on GitHub.</b></p>
+        <div class="modal-steps" style="margin-bottom:1.2rem;">
+          <div class="mstep"><div class="mstep-n">→</div><div class="mstep-body">On GitHub: click your picture (top-right) → <b>Settings</b> → <b>Public profile</b> to add these.</div></div>
+        </div>
+        <div class="field">
+          <div class="field-labelrow"><label for="m_displayname">Display name</label><span class="opt-tag">optional</span></div>
+          <span class="flabel-sub">The friendly name on your profile — real name or a handle, your call. <em>Different from your username above.</em></span>
+          <input type="text" id="m_displayname" data-key="displayName" placeholder="e.g. Jordan Rivera" autocomplete="off">
+          <div class="reassure">Don't overthink it — you can edit this on GitHub whenever you like.</div>
+        </div>
+        <div class="field">
+          <div class="field-labelrow"><label for="m_bio">A one-line bio</label><span class="opt-tag">optional</span></div>
+          <span class="flabel-sub">Who you are or what you build.</span>
+          <input type="text" id="m_bio" data-key="bio" placeholder="e.g. I build small tools that solve everyday annoyances." autocomplete="off">
+          <div class="reassure">Rough is fine — jot anything, or let AI write it for you below, then paste the result back into this field.</div>
+          <div class="mini-extract" style="margin-top:.7rem;">
+            <div class="me-hdr"><span>🤖 Bio writer prompt</span><button class="copy-btn" onclick="copyPrompt(this)">Copy</button></div>
+            <div class="me-body">Write a friendly one-line GitHub bio (under 100 characters) for someone who builds small, useful software projects. Here's a bit about me: [describe yourself in a few words, e.g. "hobbyist who makes simple tools"]. Give me 3 short options to choose from. Then I'll paste my favourite into the bio field above.</div>
+          </div>
+        </div>
+        <div class="note tip" style="font-size:.9rem;margin:1rem 0 0;"><span class="lbl" data-kind="info">Add a profile photo</span>On the same Settings page, click your avatar to upload any photo — a headshot or a friendly icon. A real image instantly makes you look like a person, not a spam account.</div>
+        <div class="modal-nav">
+          <button class="mbtn mbtn-ghost" data-action="back">← Back</button>
+          <button class="mbtn mbtn-primary" data-action="next">Next: your project →</button>
+        </div>
+      </div>
+
+      <!-- SCREEN 3: project details (everyone) -->
+      <div class="mscreen" data-screen="project" hidden>
+        <div class="modal-progress" data-progress></div>
+        <div class="modal-kicker">Tell me about your project</div>
+        <h2>Your project, <em>in your words</em></h2>
+        <p class="lede">Answer these once and they flow into every step and AI prompt below — so later you just click <b>Copy</b> and paste. <b>None of this needs to be precise</b>; your answers get fed into AI prompts that improve them.</p>
+
+        <div class="extract-promo">
+          <div class="ep-hi">😅 Don't feel like writing? Let AI do it first.</div>
+          <p>Paste this into any AI <b>with your project file attached</b>, and it'll hand back tidy answers. <b>Then copy each answer into the matching field below</b> — the labels line up exactly. This is the easiest path.</p>
+          <div class="attach-flag"><span class="af-ico">📎</span><div><b>Attach your project file or code</b> to the AI chat when you send this.</div></div>
+          <div class="mini-extract">
+            <div class="me-hdr"><span>🤖 Info extractor prompt</span><button class="copy-btn" onclick="copyPrompt(this)">Copy</button></div>
+            <div class="me-body">I'm about to put a project on GitHub and need to describe it. I've attached my project file. Based on it, give me short answers to these, each on its own line, labelled exactly as shown so I can paste them into a form:
+
+What's your project called?: <span class="fill">(suggest a clean short name)</span>
+What does it do?: <span class="fill">(1-2 plain sentences)</span>
+Who's it for?: <span class="fill">(target users)</span>
+Its main features: <span class="fill">(3-5 short points, comma-separated)</span>
+How do people use it?: <span class="fill">(e.g. download and open in browser)</span>
+
+Keep it warm and plain, for a non-technical reader. Output only those five labelled lines.</div>
+          </div>
+        </div>
+
+        <div class="field" data-existing-only hidden>
+          <div class="field-labelrow"><label for="m_username2">Your GitHub username</label></div>
+          <span class="flabel-sub">So your shareable links fill in correctly.</span>
+          <input type="text" id="m_username2" data-key="githubUsername" placeholder="e.g. jrivera" autocomplete="off" spellcheck="false">
+        </div>
+
+        <div class="field">
+          <div class="field-labelrow"><label for="m_projname">What's your project called?</label></div>
+          <span class="flabel-sub">Anything's fine — we'll show how GitHub tidies it into a link.</span>
+          <input type="text" id="m_projname" data-key="projectName" placeholder="e.g. My Budget App" autocomplete="off" spellcheck="false">
+          <div class="modal-slug" id="modalSlug"></div>
+        </div>
+
+        <div class="field">
+          <div class="field-labelrow"><label for="m_what">What does it do?</label></div>
+          <span class="flabel-sub">One or two plain sentences, like telling a friend.</span>
+          <textarea id="m_what" data-key="whatItDoes" placeholder="e.g. A simple spreadsheet that tracks where my money goes and warns me before I overspend."></textarea>
+          <div class="reassure">A rough sentence is plenty — the README-writer prompt will turn it into polished text.</div>
+        </div>
+
+        <div class="field">
+          <div class="field-labelrow"><label for="m_who">Who's it for?</label></div>
+          <span class="flabel-sub">Your target users — even "people like me" counts.</span>
+          <textarea id="m_who" data-key="targetUsers" placeholder="e.g. People who find budgeting apps overwhelming and just want something simple."></textarea>
+          <div class="reassure">Don't agonise — the AI prompts use this as a starting point, not the final word.</div>
+        </div>
+
+        <div class="field">
+          <div class="field-labelrow"><label for="m_features">Its main features</label></div>
+          <span class="flabel-sub">A few points, separated by commas or new lines.</span>
+          <textarea id="m_features" data-key="featuresRaw" placeholder="e.g. Auto-categorizes spending, works offline, no signup needed"></textarea>
+          <div class="reassure">Just list what comes to mind — we'll split these into bullets for you.</div>
+        </div>
+
+        <div class="field">
+          <div class="field-labelrow"><label for="m_howused">How do people use it?</label></div>
+          <span class="flabel-sub">How someone actually opens or runs it.</span>
+          <input type="text" id="m_howused" data-key="howUsed" placeholder="e.g. Download the file and open it in any browser">
+          <div class="reassure">A short phrase is fine.</div>
+        </div>
+
+        <div class="modal-nav">
+          <button class="mbtn mbtn-ghost" data-action="back" data-back-optional>← Back</button>
+          <button class="mbtn mbtn-primary" data-action="finish">✓ Fill in my guide</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- floating: stuck helper + optional cards (maintenance + funding) + save/reset row -->
+<div class="float-stack" id="floatStack">
+  <div class="float-progress" id="floatProgress">Progress: <b>0</b> / 5 steps</div>
+  <div class="float-maint float-stuck" id="stuckFloatBtn" title="Stuck on any GitHub screen? Get AI help — screenshot included">
+    <div class="fm-ico">🆘</div>
+    <div class="fm-txt">Stuck on a screen?<small>GitHub looks different? Get AI help — anytime</small></div>
+  </div>
+  <div class="float-maint" id="maintFloatBtn" title="Add, replace, update or delete a file — your work is always recoverable">
+    <div class="fm-ico">🔧</div>
+    <div class="fm-txt">Add or change a file?<small>Add, replace, update or delete — you're always safe</small></div>
+  </div>
+  <div class="float-maint float-fund" id="fundFloatBtn" title="Optional: let supporters fund your work (GitHub Sponsors, Ko-fi, etc.)">
+    <div class="fm-ico">💝</div>
+    <div class="fm-txt">Want to accept funding?<small>GitHub Sponsors, Ko-fi &amp; more — optional, any time</small></div>
+  </div>
+  <div class="float-row">
+    <button class="float-btn fresh" id="freshBtn" title="Clear everything and start a brand-new project">🔄 Start fresh</button>
+    <button class="float-btn print" id="printBtn" title="Open a printer-friendly one-page checklist (print or Save as PDF)">📋 Checklist</button>
+    <button class="float-btn save" id="saveBtn" title="Download a copy with your progress saved in it">💾 Save</button>
+  </div>
+</div>
+
+<!-- sticky progress tracker -->
+<div class="tracker" id="tracker" style="display:none;">
+  <div class="tracker-inner">
+    <div class="tracker-label" id="trackerLabel">Progress: <b>0</b> / 5 steps</div>
+    <div class="tracker-bar"><div class="tracker-fill" id="trackerFill"></div></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="kicker">Your calm, step-by-step guide</div>
+    <h1>Putting Your Project<br>on <em>GitHub</em> Buddy</h1>
+    <p class="sub">GitHub isn't the friendliest place the first time. This walks you through it — slowly, plainly, with every confusing word explained.</p>
+    <div class="deco-line"></div>
+  </header>
+
+  <!-- reassuring intro banner (shown after setup) -->
+  <div class="intro-banner" id="introBanner" style="display:none;">
+    <div class="ib-hi" id="introHi">You've got this — now the fun part.</div>
+    <p id="introMsg">Take a breath: from here it's just <b>five small steps, top to bottom</b>. Each one opens as you go, your project details are already filled in, and you can't break anything. Let's start by making your repository.</p>
+  </div>
+
+  <!-- editable project-name pill -->
+  <div class="namebox">
+    <label id="nameboxLabel">① Your project name</label>
+    <div class="name-row">
+      <input type="text" id="projInput" class="locked" placeholder="e.g. my-budget-app" autocomplete="off" spellcheck="false" readonly>
+      <button class="name-edit-btn" id="nameEditBtn">✎ Change</button>
+    </div>
+    <div class="hint" id="nameHint">This is the name you entered. It flows into every step below. <b>Looks good?</b> Leave it. Want to tweak it? Click <em>Change</em>.</div>
+    <div class="slug-preview" id="slugPreview"></div>
+  </div>
+
+  <!-- legend: how the AI prompts work -->
+  <div class="legend" id="promptLegend">
+    <div class="legend-hi">How the <span class="badge-demo">✓ Pre-filled</span> AI prompts work</div>
+    <div class="legend-rows">
+      <div class="legend-row">
+        <span class="legend-swatch green"><span class="swatch-text">your text</span></span>
+        <div class="legend-txt"><b>Green = your saved answers.</b> <span class="legend-swatch-inline grey">Grey italic</span> = examples you can replace. <b>Click any to edit</b> — it updates everywhere it appears.</div>
+      </div>
+      <div class="legend-row">
+        <span class="legend-swatch copy">Copy</span>
+        <div class="legend-txt"><b>Or copy the whole prompt</b> into ChatGPT / Claude / any AI and edit your answers there. Either way works.</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="toc">
+    <a href="#s1">1 · Make the repo</a>
+    <a href="#s2">2 · Upload a file</a>
+    <a href="#s3">3 · Write the README</a>
+    <a href="#s4">4 · Make a release</a>
+    <a href="#s5">5 · Polish &amp; publish</a>
+  </nav>
+
+  <!-- STEP 1 -->
+  <div class="step open" id="s1" data-step>
+    <div class="step-hdr" onclick="toggleStep(this)">
+      <div class="step-num"><span>1</span></div>
+      <div class="step-title">Make the repository<small>The "repo" is just a folder that holds your project online</small></div>
+      <div class="chevron">▸</div>
+    </div>
+    <div class="step-body">
+      <p>A <span class="term">repository<span class="tip">"Repository" (or "repo") is GitHub's word for a project folder. It holds all your files plus a history of every change. One project = one repo.</span></span> is where your project will live. Let's make one.</p>
+      <ol>
+        <li>Go to <code>github.com</code> and log in.</li>
+        <li>Top-right corner, click the <span class="btn-ref">+</span> icon, then <span class="btn-ref">New repository</span>.</li>
+        <li><b>Repository name:</b> type <span class="proj" data-proj>your-project-name</span>. <span class="term">Names are special<span class="tip">GitHub names can't have spaces or most symbols. Spaces become hyphens, capitals usually become lowercase. This becomes part of your web address, so keep it short and clean.</span></span> — see the box above for how yours looks.</li>
+        <li><b>Description</b> (optional): one sentence on what it does. <span class="term">Why bother<span class="tip">This shows up under your project name and in search results — the first thing visitors read. One clear sentence is plenty.</span></span>. <a class="ai-inline" data-jump="ai-desc-drawer">✨ Need help? Open the description writer →</a></li>
+        <li id="s1-visibility"><b>Visibility:</b> choose <span class="term">Public<span class="tip">Public = anyone can see and download it. Private = only you and people you invite. For sharing a free tool, you want Public.</span></span>.</li>
+        <li>Check <span class="btn-ref">Add a README file</span>. <span class="term">What's that<span class="tip">A README is the "front page" of your project — the text people see when they open your repo. We write a proper one in Step 3. For now let GitHub create a blank one.</span></span></li>
+        <li>For <span class="term">.gitignore<span class="tip">A .gitignore tells GitHub which files NOT to track. You only need it for complex coding projects. For a single file, leave it as 'No .gitignore'.</span></span>, leave it as <code>No .gitignore</code>.</li>
+        <li>For <span class="term">License<span class="tip">A license says what people may legally do with your code. 'MIT' is the most common and permissive — basically 'do what you want, just don't sue me.' Great default for free projects.</span></span>, pick <code>MIT License</code>.</li>
+        <li>Click the green <span class="btn-ref">Create repository</span>.</li>
+      </ol>
+      <div class="note tip"><span class="lbl" data-kind="safe">You did it<span class="note-skim">— just so you know</span></span>You now have a project page at <code>github.com/<span class="userfill" data-fill="githubUsername">your-username</span>/<span data-proj>your-project-name</span></code>. That's the link you'll share.</div>
+
+      <details class="ai-drawer" id="ai-desc-drawer">
+        <summary><span class="ad-spark">✨</span> Need a description? Let AI write it <span class="ad-hint">(optional — tap to open)</span><span class="ad-chev">▸</span></summary>
+        <div class="ai-drawer-body">
+          <p>Copy this, paste it into any AI — it's already filled with your project details:</p>
+          <div class="attach-flag" data-attach><span class="af-ico">📎</span><div><b>Attach your project file</b> to the AI chat with this for the most accurate result.</div></div>
+          <div class="prompt" id="p-desc">
+            <div class="prompt-hdr"><span>📋 Description writer <span class="ready-badge">✓ Pre-filled</span></span><button class="copy-btn" onclick="copyPrompt(this)">Copy</button></div>
+            <div class="prompt-body">Write a single-sentence GitHub project description for my project "<span class="fill" data-proj data-fill="projectName">your-project-name</span>". Here is what it does: <span class="fill" data-fill="whatItDoes">[paste your project file here, or describe it]</span>. Make it clear and punchy. Give me 3 very short options to choose from (each under 120 characters total) so I can paste one straight in.</div>
+          </div>
+          <button class="substep-next" data-next-to="s1-visibility">Pasted my description ✓ &nbsp;Next: choose Visibility →</button>
+        </div>
+      </details>
+
+      <div class="step-done-row"><input type="checkbox" class="step-check" id="done1"><label for="done1">I've made my repository</label></div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="s2" data-step>
+    <div class="step-hdr" onclick="toggleStep(this)">
+      <div class="step-num"><span>2</span></div>
+      <div class="step-title">Upload your file(s)<small>Drag, drop, and "commit" — we'll explain that word</small></div>
+      <div class="chevron">▸</div>
+    </div>
+    <div class="step-body">
+      <ol>
+        <li>On your repo page, click <span class="btn-ref">Add file</span> → <span class="btn-ref">Upload files</span>.</li>
+        <li>Drag your file(s) into the upload area (or click to browse).</li>
+        <li>Wait for the upload bar to finish.</li>
+        <li>Scroll to the <span class="term">Commit changes<span class="tip">"Commit" means "save this change permanently, with a note about what you did." Every commit is a snapshot GitHub remembers forever.</span></span> box.</li>
+        <li>In the message box, write something simple like <code>Add <span data-proj>project</span> files</code>.</li>
+        <li>Leave the <span class="term">extended description<span class="tip">An optional longer note for complex changes. For simple uploads, leave it blank.</span></span> blank.</li>
+        <li>Make sure <span class="term">Commit directly to the main branch<span class="tip">A 'branch' is a version line of your project. 'main' is the default. For simple solo projects you always just use main.</span></span> is selected.</li>
+        <li>Click <span class="btn-ref">Commit changes</span>.</li>
+      </ol>
+      <div class="note"><span class="lbl" data-kind="info">Good to know<span class="note-skim">— info, no action needed</span></span>Your files now appear in the repo's file list. Uploading more later works the same way. <b>Need to replace or remove a file?</b> That's what the <span style="color:var(--blue)">🔧 Change a file later?</span> button (bottom-right) is for — ignore it for now.</div>
+      <div class="step-done-row"><input type="checkbox" class="step-check" id="done2"><label for="done2">I've uploaded my file(s)</label></div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" id="s3" data-step>
+    <div class="step-hdr" onclick="toggleStep(this)">
+      <div class="step-num"><span>3</span></div>
+      <div class="step-title">Write a good README<small>The front page that decides whether people stay</small></div>
+      <div class="chevron">▸</div>
+    </div>
+    <div class="step-body">
+      <p>The README is the most important text in your project — what visitors read first. A good one is the difference between "let me try it" and "I don't get it, bye." <a class="ai-inline" data-jump="ai-readme-drawer">✨ Open the README writer →</a></p>
+      <ol>
+        <li>In your repo, click <code>README.md</code> in the file list.</li>
+        <li>Click the <span class="term">pencil icon ✏️<span class="tip">The pencil (top-right of the file view) means 'edit this file' right in your browser.</span></span> to edit.</li>
+        <li>Select all the existing text and delete it.</li>
+        <li id="s3-paste">Paste in your new README (use the prompt below to write a great one).</li>
+        <li>Scroll down, write commit message <code>Add full README</code>, click <span class="btn-ref">Commit changes</span>.</li>
+      </ol>
+      <div class="note"><span class="lbl" data-kind="info">What's Markdown?<span class="note-skim">— info, no action needed</span></span>READMEs use <span class="term">Markdown<span class="tip"># makes a heading, **text** makes bold, - makes a bullet. GitHub turns it into nice formatting. The AI prompt writes it for you.</span></span>, a simple formatting style. You don't need to learn it — the prompt below writes it for you.</div>
+
+      <details class="ai-drawer" id="ai-readme-drawer">
+        <summary><span class="ad-spark">✨</span> Let AI write your whole README <span class="ad-hint">(tap to open)</span><span class="ad-chev">▸</span></summary>
+        <div class="ai-drawer-body">
+          <p>Already filled with your project details — copy and paste it in:</p>
+          <p style="font-size:.9rem;color:var(--ink2);font-style:italic;margin-top:-.4rem;">If you're not sure about a section, just leave the grey text — the AI will still give you something useful.</p>
+          <div class="attach-flag" data-attach><span class="af-ico">📎</span><div><b>Attach your project file</b> when you paste this — the AI will describe your real features instead of guessing.</div></div>
+          <div class="prompt" id="p-readme">
+            <div class="prompt-hdr"><span>📋 README writer <span class="ready-badge">✓ Pre-filled</span></span><button class="copy-btn" onclick="copyPrompt(this)">Copy</button></div>
+            <div class="prompt-body">Write a clear, friendly README in Markdown for my project called "<span class="fill" data-proj data-fill="projectName">your-project-name</span>".
+
+What it does: <span class="fill" data-fill="whatItDoes">[describe your project in 1-2 sentences]</span>
+
+Who it's for: <span class="fill" data-fill="targetUsers">[describe your target users]</span>
+
+Key features:
+- <span class="fill" data-fill="feature1">[feature 1]</span>
+- <span class="fill" data-fill="feature2">[feature 2]</span>
+- <span class="fill" data-fill="feature3">[feature 3]</span>
+
+How people use it: <span class="fill" data-fill="howUsed">[e.g. download the file and open it, or run a command]</span>
+
+Please include: a short intro, a features list, simple step-by-step usage instructions, a privacy/disclaimer note if relevant, and a friendly closing. Keep the tone warm and plain — assume the reader is not technical. Output only the Markdown, nothing else.</div>
+          </div>
+          <button class="substep-next" data-next-to="s3-paste">Copied my README ✓ &nbsp;Next: paste &amp; commit →</button>
+        </div>
+      </details>
+      <div class="step-done-row"><input type="checkbox" class="step-check" id="done3"><label for="done3">My README is written</label></div>
+    </div>
+  </div>
+
+  <!-- in-flow reassurance banner -->
+  <div class="reassure-banner" id="reassureBanner" onclick="openMaint()">
+    <span class="rb-ico">🔒</span>
+    <div class="rb-txt"><b>Nothing here is permanent — you can't break anything.</b> You can add, edit, replace, or delete files later, and GitHub keeps a history of everything. <span class="rb-link">See how →</span></div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step" id="s4" data-step>
+    <div class="step-hdr" onclick="toggleStep(this)">
+      <div class="step-num"><span>4</span></div>
+      <div class="step-title">Make a "Release"<small>This creates the clean one-click Download button</small></div>
+      <div class="chevron">▸</div>
+    </div>
+    <div class="step-body">
+      <p>A <span class="term">Release<span class="tip">A 'Release' is a tidy official snapshot of your project, like 'version 1.0'. It gives visitors a clean download button instead of making them hunt through code files.</span></span> gives people a friendly download button instead of forcing them to dig through your files.</p>
+      <ol>
+        <li>On your repo's main page, find <span class="btn-ref">Releases</span> in the right sidebar → <span class="btn-ref">Create a new release</span>.</li>
+        <li>Click <span class="term">Choose a tag<span class="tip">A 'tag' is a version label like v1.0. Type 'v1.0' and click 'Create new tag'. Future updates would be v1.1, v2.0, etc.</span></span> → type <code>v1.0</code> → confirm "Create new tag."</li>
+        <li><b>Release title:</b> something like <code>v1.0 — First release</code>.</li>
+        <li><b>Describe this release:</b> a few sentences on what it is and how to use it.</li>
+        <li><b>Attach your file:</b> drag your downloadable file into the <span class="term">"Attach binaries"<span class="tip">'Binaries' just means 'files for download' here. Dragging your file here attaches it as a clean, directly-downloadable asset — the file people click to get.</span></span> zone near the bottom.</li>
+        <li>Leave the label as <span class="btn-ref">None</span> (not pre-release).</li>
+        <li>Click <span class="btn-ref">Publish release</span>.</li>
+      </ol>
+      <div class="note tip"><span class="lbl" data-kind="safe">Now it's easy for everyone<span class="note-skim">— just so you know</span></span>Your release page shows your file under "Assets" with a download link. In your README you can link to <code>github.com/<span class="userfill" data-fill="githubUsername">your-username</span>/<span data-proj>your-project-name</span>/releases/latest</code> so people always get the newest version.</div>
+      <div class="step-done-row"><input type="checkbox" class="step-check" id="done4"><label for="done4">I've published a release</label></div>
+    </div>
+  </div>
+
+  <!-- STEP 5 (was 6) -->
+  <div class="step" id="s5" data-step>
+    <div class="step-hdr" onclick="toggleStep(this)">
+      <div class="step-num"><span>5</span></div>
+      <div class="step-title">Polish &amp; publish<small>Finishing touches that help people find and trust your project</small></div>
+      <div class="chevron">▸</div>
+    </div>
+    <div class="step-body">
+      <p>Your project works and is downloadable. These last touches make it <em>discoverable</em>. All optional, all quick.</p>
+      <h4>Add topic tags (helps people find you)</h4>
+      <p>Topic <span class="term">tags<span class="tip">'Topics' are keyword tags (like 'finance', 'tools', 'html') that help people find your project when browsing or searching GitHub.</span></span> make your project show up when people search GitHub. <a class="ai-inline" data-jump="ai-tags-drawer">✨ Open the tag suggester →</a></p>
+      <ol>
+        <li>On your repo's main page, click the <span class="term">gear icon ⚙️<span class="tip">In the right sidebar next to 'About'. Opens a dialog to edit your description and topics.</span></span> next to <b>"About"</b>.</li>
+        <li>In the <b>Topics</b> field, type each tag and press Enter. (Lowercase, hyphens for spaces.)</li>
+        <li>Click <span class="btn-ref">Save changes</span>.</li>
+      </ol>
+      <details class="ai-drawer" id="ai-tags-drawer">
+        <summary><span class="ad-spark">✨</span> Not sure which tags? Let AI suggest them <span class="ad-hint">(tap to open)</span><span class="ad-chev">▸</span></summary>
+        <div class="ai-drawer-body">
+          <div class="attach-flag" data-attach><span class="af-ico">📎</span><div><b>Attach your project file</b> for the most relevant tag suggestions.</div></div>
+          <div class="prompt" id="p-tags">
+            <div class="prompt-hdr"><span>📋 Topic tag suggester <span class="ready-badge">✓ Pre-filled</span></span><button class="copy-btn" onclick="copyPrompt(this)">Copy</button></div>
+            <div class="prompt-body">Suggest 6-8 GitHub topic tags for my project "<span class="fill" data-proj data-fill="projectName">your-project-name</span>". Here's what it does: <span class="fill" data-fill="whatItDoes">[paste or describe your project]</span>. Topic tags must be lowercase with hyphens instead of spaces. Give me the most discoverable ones.</div>
+          </div>
+        </div>
+      </details>
+      <h4>Pin it to your profile</h4>
+      <p>Feature your project on your personal GitHub page instead of letting it get buried.</p>
+      <ol>
+        <li>On your repo page, click <span class="btn-ref">Pin</span> near the top-right.</li>
+        <li>Or: your picture → <b>Your profile</b> → <b>Customize your pins</b> → tick your repo → <b>Save pins</b>.</li>
+      </ol>
+      <div class="note tip"><span class="lbl" data-kind="safe">The 2-minute sanity check<span class="note-skim">— worth doing</span></span>Before posting your link anywhere, <b>be your own first user</b>: open your repo in an incognito window (so you're "logged out" like a stranger), click your download link, and open the file. If it works for you as an outsider, it works for everyone.</div>
+      <h4>You're done — share it</h4>
+      <p>Your shareable link is simply <code>github.com/<span class="userfill" data-fill="githubUsername">your-username</span>/<span data-proj>your-project-name</span></code>. Drop it wherever your audience is — forums, Reddit, chat groups.</p>
+      <div class="step-done-row"><input type="checkbox" class="step-check" id="done5"><label for="done5">Polished and published!</label></div>
+    </div>
+  </div>
+
+  <!-- prominent optional/maintenance box (full step-box size) -->
+  <div class="maint-box" id="maintBox">
+    <div class="maint-box-hdr">
+      <div class="step-num" style="background:linear-gradient(135deg,var(--blue),#a3c0d6);"><span>+</span></div>
+      <div class="step-title">Need to add or change a file later? Add, replace, update, or delete<small>Optional — not part of setup. Open this whenever you want to add a new file, swap one out, or remove one (even weeks from now)</small></div>
+      <div class="maint-box-arrow">Open guide →</div>
+    </div>
+  </div>
+
+  <!-- completion celebration -->
+  <div class="complete-card" id="completeCard">
+    <h3>🎉 That's the whole thing.</h3>
+    <p>Every step ticked. Your project is live, downloadable, and shareable. Beautifully done — now go tell people about it.</p>
+  </div>
+
+  <div class="div-orn">✦ ✦ ✦</div>
+
+  <div class="maker-card">
+    <div class="maker-inner">
+      <div class="maker-text">
+        <div class="maker-hi">Made this guide because GitHub's first-timer experience was rough.</div>
+        <p>If it saved you some stress and you'd like to see what else I build, my projects live here. No pressure at all — a follow or a look is lovely too.</p>
+      </div>
+      <a class="maker-btn" href="https://github.com/wtkmbspassive" target="_blank" rel="noopener">↗ Visit my GitHub</a>
+    </div>
+  </div>
+
+  <footer>
+    <p>That's the whole thing. You've got this.</p>
+    <p>Remember: GitHub keeps a history of everything, so you can't permanently break anything. Experiment freely.</p>
+    <p class="mono">made to take the panic out of your first upload — and every one after that.</p>
+  </footer>
+</div>
+
+<!-- ════════ STUCK HELPER MODAL (always available) ════════ -->
+<div class="modal-overlay" id="stuckOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Stuck on a GitHub screen">
+    <button class="modal-close" id="stuckClose" title="Close">✕</button>
+    <div class="modal-scroll">
+      <div class="modal-kicker">🆘 Help, anytime</div>
+      <h2>Stuck on a <em>GitHub screen?</em></h2>
+      <p class="lede">Something look different or confusing? You're not doing anything wrong. Copy the prompt below into any AI and it'll walk you through whatever you're looking at. <b>No question is too small</b> — GitHub changes often, so a fresh pair of AI eyes helps.</p>
+
+      <div class="note warn"><span class="lbl" data-kind="watch">GitHub changes often<span class="note-skim">— important</span></span><b>GitHub updates its interface regularly</b>, so buttons may move or get renamed and won't always match this guide exactly. Don't panic if something looks off — a <b>screenshot sent to an AI</b> is the fastest way to find the right button on whatever screen you're actually seeing.</div>
+
+      <div class="attach-flag"><span class="af-ico">📷</span><div><b>Take a screenshot</b> of the confusing screen and attach it to the AI chat — it can read the screen and tell you exactly what to click.</div></div>
+      <div class="prompt">
+        <div class="prompt-hdr"><span>📋 GitHub helper (use anytime)</span><button class="copy-btn" onclick="copyPrompt(this)">Copy</button></div>
+        <div class="prompt-body">I'm new to GitHub and trying to <span class="fill">[describe what you're trying to do]</span>. I'm looking at <span class="fill">[describe the screen, or paste a screenshot]</span>. The interface may have changed since the guide I'm following. Walk me through it step by step in plain language, tell me exactly what to click on the screen I've shown you, and explain any technical words you use.</div>
+      </div>
+      <div class="modal-nav" style="justify-content:flex-end;">
+        <button class="mbtn mbtn-primary" data-stuck-close style="flex:none;">Got it, close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ FUNDING MODAL (optional) ════════ -->
+<div class="modal-overlay" id="fundOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Setting up funding">
+    <button class="modal-close" id="fundClose" title="Close">✕</button>
+    <div class="modal-scroll">
+      <div class="modal-kicker">💝 Optional — a week-two task</div>
+      <h2>Set up <em>funding</em></h2>
+      <p class="lede">Totally optional and <b>not needed to publish</b>. If you're sharing something useful for free, this lets grateful users chip in. Come back any time. <b>The most GitHub-native option is GitHub Sponsors</b>, but you can offer any combination.</p>
+
+      <h4>Option 1 — GitHub Sponsors (most native, 0% fees)</h4>
+      <p>GitHub's own funding tool. People sponsor you right from your profile or repo, with one-time or monthly amounts, and <span class="term">GitHub takes 0%<span class="tip">GitHub charges no platform fee — they cover the processing costs. Behind the scenes it uses Stripe, so it's available in roughly 70 countries.</span></span>.</p>
+      <ol>
+        <li>Go to <code>github.com/sponsors</code> and click <span class="btn-ref">Join the waitlist</span> / <span class="btn-ref">Set up Sponsors</span>.</li>
+        <li>Follow the steps to add your bank details (via Stripe) and set up optional <span class="term">tiers<span class="tip">Tiers are suggested amounts like $3/month or $25 one-time. You can also just allow custom amounts. Totally optional.</span></span>.</li>
+        <li>Once approved, your profile gets a <span class="btn-ref">♥ Sponsor</span> button automatically.</li>
+      </ol>
+      <div class="note"><span class="lbl" data-kind="info">Good to know<span class="note-skim">— info, no action needed</span></span>Sponsors needs approval and isn't available everywhere yet. If you're not eligible or want extra options, the platforms below work for everyone and link from the same Sponsor button.</div>
+
+      <h4>Option 2 — A donation page (works for everyone)</h4>
+      <p>These give you a friendly public page people can visit. Most need a <em>payment processor</em> (PayPal or Stripe) connected behind the scenes.</p>
+      <div class="dono-grid">
+        <a class="dono" href="https://ko-fi.com" target="_blank" rel="noopener"><div class="dn">Ko-fi</div><div class="dd">0% commission (just the processor's fee). Founder-friendly. Becomes <code>ko-fi.com/yourname</code>.</div><div class="darrow">ko-fi.com →</div></a>
+        <a class="dono" href="https://buymeacoffee.com" target="_blank" rel="noopener"><div class="dn">Buy Me a Coffee</div><div class="dd">Very popular and simple. ~5% commission. Becomes <code>buymeacoffee.com/yourname</code>.</div><div class="darrow">buymeacoffee.com →</div></a>
+        <a class="dono" href="https://liberapay.com" target="_blank" rel="noopener"><div class="dn">Liberapay</div><div class="dd">Non-profit, open-source, <b>0% platform fee</b>. Great for recurring weekly/monthly support.</div><div class="darrow">liberapay.com →</div></a>
+        <a class="dono" href="https://opencollective.com" target="_blank" rel="noopener"><div class="dn">Open Collective</div><div class="dd">Fully transparent — backers see exactly how funds are spent. ~10% fee. Best for community projects.</div><div class="darrow">opencollective.com →</div></a>
+        <a class="dono" href="https://www.patreon.com" target="_blank" rel="noopener"><div class="dn">Patreon</div><div class="dd">Membership-style with tiers and perks. Good if you want an ongoing supporter community.</div><div class="darrow">patreon.com →</div></a>
+        <a class="dono" href="https://www.paypal.com" target="_blank" rel="noopener"><div class="dn">PayPal</div><div class="dd">The simplest direct option most people recognize. A Business account (free) can accept donations.</div><div class="darrow">paypal.com →</div></a>
+      </div>
+      <div class="note tip"><span class="lbl" data-kind="info">More advanced: bounties<span class="note-skim">— optional reading</span></span>Some projects also use <b>bounty</b> platforms where companies or users pay for specific features or fixes. If that interests you, the main ones are <a href="https://issuehunt.io" target="_blank" rel="noopener" style="color:var(--accent);">IssueHunt</a> (companies post bounties on your issues) and <a href="https://www.gitcoin.co" target="_blank" rel="noopener" style="color:var(--accent);">Gitcoin</a> (crypto-based bounties). They suit larger or more active projects, so there's no rush — but you don't have to skip it if you're keen.</div>
+
+      <div class="note"><span class="lbl" data-kind="info">A note on names<span class="note-skim">— info, no action needed</span></span>Your donation pages show a <b>nickname</b> publicly, but the processor (PayPal/Stripe) needs your <b>real legal name + ID</b> behind the scenes for tax and anti-fraud rules. That's normal — donors only see your nickname.</div>
+
+      <h4>Add the "Sponsor" button to your repo</h4>
+      <p>Whichever options you chose, this puts a <span class="btn-ref">♥ Sponsor</span> button at the top of your project linking them all.</p>
+      <ol>
+        <li>In your repo: <span class="btn-ref">Add file</span> → <span class="btn-ref">Create new file</span>.</li>
+        <li>For the filename, type exactly: <code>.github/FUNDING.yml</code> <span class="term">(why the path?)<span class="tip">Typing '.github/' first creates a special folder GitHub looks in. FUNDING.yml inside it is the exact name GitHub recognizes. Caps matter: FUNDING in caps, .yml lowercase.</span></span></li>
+        <li>Paste this — keep only the lines for platforms you actually use, and replace <span style="color:var(--gold);font-weight:700;">yourname</span> with your usernames:</li>
+      </ol>
+      <div class="prompt">
+        <div class="prompt-hdr"><span>📄 FUNDING.yml contents</span><button class="copy-btn" onclick="copyPrompt(this)">Copy</button></div>
+        <div class="prompt-body">github: <span class="fill" data-fill="githubUsername">yourname</span>
+ko_fi: <span class="fill">yourname</span>
+buy_me_a_coffee: <span class="fill">yourname</span>
+liberapay: <span class="fill">yourname</span>
+patreon: <span class="fill">yourname</span></div>
+      </div>
+      <p>Then commit it (message: <code>Add funding links</code>).</p>
+      <h4>Switch the Sponsor button ON (don't skip!)</h4>
+      <p>The part that catches everyone: <b>creating FUNDING.yml is not enough by itself.</b> On most accounts you also flip a setting, or the button silently never appears.</p>
+      <ol>
+        <li>In your repo, click <span class="btn-ref">Settings</span> (top menu, gear icon).</li>
+        <li>On the <span class="term">General<span class="tip">The main settings page for this one repo. Scroll down to a section called 'Features'.</span></span> page, scroll to the <span class="btn-ref">Features</span> section.</li>
+        <li>Find <span class="term">Sponsorships<span class="tip">This checkbox controls whether the Sponsor button can display. FUNDING.yml says WHERE links go; this switch says SHOW them. You need both.</span></span> and tick it. Saves automatically.</li>
+        <li>Back on your repo's main page, a <span class="btn-ref">♥ Sponsor</span> button now appears.</li>
+      </ol>
+      <div class="note warn"><span class="lbl" data-kind="watch">If the button still doesn't show<span class="note-skim">— only if you hit trouble</span></span><b>(1)</b> file named <em>exactly</em> <code>.github/FUNDING.yml</code>; <b>(2)</b> it's on your <span class="term">main branch<span class="tip">The default version line. If you committed to another branch, GitHub won't read the file. For simple projects you're always on main.</span></span>; <b>(3)</b> spacing is exactly right (see below). One formatting mistake makes it silently fail.</div>
+      <div class="note warn"><span class="lbl" data-kind="watch">Spacing matters<span class="note-skim">— only if editing the file</span></span>That file is <span class="term">YAML<span class="tip">A simple text format that's picky about spaces. No spaces before the platform names, one space after each colon. Copy it exactly, and delete any lines you don't use.</span></span> — no leading spaces, one space after each colon, username only (not the full link).</div>
+      <div class="modal-nav" style="justify-content:flex-end;">
+        <button class="mbtn mbtn-primary" data-fund-close style="flex:none;">Got it, close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MAINTENANCE MODAL (Replace / Update / Delete) ════════ -->
+<div class="modal-overlay" id="maintOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Changing a file later">
+    <button class="modal-close" id="maintClose" title="Close">✕</button>
+    <div class="modal-scroll">
+      <div class="modal-kicker">🔧 For later — no rush</div>
+      <h2>Add or <em>change a file?</em></h2>
+      <p class="lede">You don't need any of this to publish. It's here for <b>later</b>, whenever you want to add a new file, swap one out, update it, or remove it. Read it when you need it.</p>
+
+      <div class="step" style="margin-bottom:1.2rem;">
+        <div class="step-hdr" onclick="toggleStep(this)">
+          <div class="step-num" style="background:linear-gradient(135deg,var(--green),#9bc285);"><span>+</span></div>
+          <div class="step-title" style="font-size:1.2rem;">Add a new file<small>Put another file into your project alongside the others</small></div>
+          <div class="chevron">▸</div>
+        </div>
+        <div class="step-body">
+          <p>Adding more files later works exactly like your first upload — they sit alongside what's already there.</p>
+          <ol>
+            <li>On your repo's main page, click <span class="btn-ref">Add file</span> → <span class="btn-ref">Upload files</span>.</li>
+            <li>Drag your new file(s) in (or click to browse). Give them a <b>name that's different</b> from your existing files, so they're added rather than replacing anything.</li>
+            <li>Scroll down, write a commit message like <code>Add <span data-proj>project</span> extra file</code>.</li>
+            <li>Keep <span class="btn-ref">Commit directly to the main branch</span> selected, then click <span class="btn-ref">Commit changes</span>.</li>
+          </ol>
+          <div class="note tip"><span class="lbl" data-kind="safe">Folders too</span>To put a file inside a folder, type the folder name and a <code>/</code> before the filename when creating it (e.g. <code>images/logo.png</code>) — GitHub makes the folder for you automatically.</div>
+          <div class="note"><span class="lbl" data-kind="info">Want it in the download?</span>If you made a Release (the clean download button), newly-added repo files aren't automatically in it. Edit the release (pencil icon) and attach the new file, or publish a fresh release.</div>
+        </div>
+      </div>
+
+      <div class="step" style="margin-bottom:1.2rem;">
+        <div class="step-hdr" onclick="toggleStep(this)">
+          <div class="step-num" style="background:linear-gradient(135deg,var(--blue),#a3c0d6);"><span>↻</span></div>
+          <div class="step-title" style="font-size:1.2rem;">Replace / update a file<small>Upload a new version over an old one — cleanly</small></div>
+          <div class="chevron">▸</div>
+        </div>
+        <div class="step-body">
+          <p>The trick: <b>the filename must match exactly</b> to replace rather than duplicate.</p>
+          <ol>
+            <li>Click <span class="btn-ref">Add file</span> → <span class="btn-ref">Upload files</span> (same as uploading).</li>
+            <li>Upload your new file — with the <b>exact same name</b> as the one already there.</li>
+            <li>Commit message: <code>Update <span data-proj>project</span> to latest</code>.</li>
+            <li>Click <span class="btn-ref">Commit changes</span>.</li>
+          </ol>
+          <div class="note warn"><span class="lbl" data-kind="watch">The #1 gotcha</span><b>If the filename differs even slightly</b> (a dot vs underscore, a capital, "(1)" on the end), GitHub treats it as a <em>new</em> file and you get two. To check the exact name: click the file and read it in your browser's address bar — it never lies. Match that exactly.</div>
+          <div class="note tip"><span class="lbl" data-kind="safe">Nothing is ever lost</span>GitHub keeps every old version in history. You can't accidentally destroy your work.</div>
+          <div class="note"><span class="lbl" data-kind="info">Updating a release too?</span>Replacing the repo file doesn't update a Release's attached download. Edit the existing release (pencil → remove old, attach new) or publish a new release with a higher tag like <code>v1.1</code>.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-hdr" onclick="toggleStep(this)">
+          <div class="step-num" style="background:linear-gradient(135deg,var(--rose),#dba093);"><span>🗑</span></div>
+          <div class="step-title" style="font-size:1.2rem;">Delete a file<small>Tidy up old or wrongly-named files</small></div>
+          <div class="chevron">▸</div>
+        </div>
+        <div class="step-body">
+          <ol>
+            <li>Click the file you want to remove, to open its page.</li>
+            <li>Near the top-right, find the <span class="term">three-dots menu ⋯<span class="tip">A '...' button hiding extra options. Some screens show a trash-can directly. If no trash can, click the three dots first.</span></span> (or a trash-can 🗑️).</li>
+            <li>Click <span class="btn-ref">Delete file</span>.</li>
+            <li>Scroll down, keep the auto-filled message (or write <code>Remove old file</code>).</li>
+            <li>Click <span class="btn-ref">Commit changes</span>.</li>
+          </ol>
+          <div class="note"><span class="lbl" data-kind="safe">Safe to delete</span>Because GitHub keeps full history, a deleted file can still be recovered from past commits. Deleting just removes it from the current version.</div>
+        </div>
+      </div>
+
+      <div class="modal-nav" style="justify-content:flex-end;">
+        <button class="mbtn mbtn-primary" data-maint-close style="flex:none;">Got it, close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- printable one-page checklist (only visible when printing) -->
+<div class="print-sheet" id="printSheet" aria-hidden="true"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ════════ STATE ════════ */
+  const state = {
+    branch:null, githubUsername:'', displayName:'', bio:'',
+    projectName:'', whatItDoes:'', targetUsers:'', featuresRaw:'',
+    feature1:'', feature2:'', feature3:'', howUsed:'',
+    setupDone:false, steps:{}
+  };
+
+  /* ════════ HELPERS ════════ */
+  function slugify(raw){
+    return (raw||'').trim().toLowerCase()
+      .replace(/[^a-z0-9._-]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+  }
+  function toggleStep(hdr){ hdr.parentElement.classList.toggle('open'); }
+  function $(id){ return document.getElementById(id); }
+
+  /* ════════ MODAL FLOW ════════ */
+  const overlay = $('modalOverlay');
+  const screens = [...document.querySelectorAll('#modalOverlay .mscreen')];
+  const FLOW_NEW = ['welcome','account','profile','project'];
+  const FLOW_EXISTING = ['welcome','project'];
+  let flow = FLOW_NEW, idx = 0;
+
+  function showScreen(name){
+    screens.forEach(s=>{ s.hidden = (s.dataset.screen !== name); });
+    const isExisting = state.branch === 'existing';
+    document.querySelectorAll('[data-existing-only]').forEach(el=>{ el.hidden = !isExisting; });
+    renderProgress(name);
+    $('modalScroll').scrollTop = 0; overlay.scrollTop = 0;
+  }
+  function renderProgress(name){
+    document.querySelectorAll('#modalOverlay [data-progress]').forEach(box=>{
+      const steps = flow.filter(f=>f!=='welcome');
+      const pos = steps.indexOf(name);
+      box.innerHTML='';
+      // dots row
+      const dots=document.createElement('div'); dots.className='pdots-row';
+      steps.forEach((_,i)=>{
+        const d=document.createElement('div');
+        d.className='pdot'+(i<pos?' done':'')+(i===pos?' active':'');
+        dots.appendChild(d);
+      });
+      box.appendChild(dots);
+      // text label
+      const lbl=document.createElement('div'); lbl.className='pstep-label';
+      lbl.innerHTML=`Step <b>${pos+1}</b> of ${steps.length}`;
+      box.appendChild(lbl);
+    });
+  }
+  let _modalEditMode = false;
+  function openModal(editMode){
+    _modalEditMode = !!editMode;
+    if(editMode){
+      flow = state.branch === 'new' ? FLOW_NEW : FLOW_EXISTING;
+      idx = flow.indexOf('project'); showScreen('project');
+    } else { idx=0; showScreen('welcome'); }
+    overlay.classList.add('show');
+    document.body.style.overflow='hidden';
+  }
+  function closeModal(){
+    overlay.classList.remove('show');
+    document.body.style.overflow='';
+    showFloatStack();
+  }
+  function showFloatStack(){
+    $('floatStack').classList.add('show');
+    // start the gentle breathing pulse on the optional floaters so they stay noticeable
+    const sf=$('stuckFloatBtn'), mf=$('maintFloatBtn'), ff=$('fundFloatBtn');
+    if(sf) sf.classList.add('breathe');
+    if(mf) mf.classList.add('breathe');
+    if(ff) ff.classList.add('breathe');
+  }
+
+  document.querySelectorAll('.branch-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      state.branch = card.dataset.branch;
+      flow = state.branch === 'new' ? FLOW_NEW : FLOW_EXISTING;
+      idx = 1; showScreen(flow[idx]);
+    });
+  });
+
+  overlay.addEventListener('click', e=>{
+    const btn = e.target.closest('[data-action]'); if(!btn) return;
+    const a = btn.dataset.action;
+    if(a==='next'){ collectCurrent(); idx=Math.min(idx+1,flow.length-1); showScreen(flow[idx]); }
+    else if(a==='back'){ idx=Math.max(idx-1,0); showScreen(flow[idx]); }
+    else if(a==='skip-all'){ closeModal(); }
+    else if(a==='finish'){ collectCurrent(); finishSetup(); }
+  });
+  $('modalClose').addEventListener('click', ()=>{ collectCurrent(); finishSetup(); });
+
+  function collectCurrent(){
+    document.querySelectorAll('#modalOverlay .mscreen:not([hidden]) [data-key]').forEach(inp=>{
+      const k=inp.dataset.key;
+      if(inp.value.trim()!=='') state[k]=inp.value.trim();
+    });
+    deriveFeatures();
+  }
+  function deriveFeatures(){
+    const raw = state.featuresRaw||'';
+    if(!raw.trim()){ state.feature1=state.feature2=state.feature3=''; return; }
+    const parts = raw.split(/[\n,;]+|(?:^|\s)[-*•·]\s+/).map(s=>s.trim()).filter(Boolean);
+    state.feature1=parts[0]||''; state.feature2=parts[1]||''; state.feature3=parts[2]||'';
+  }
+
+  // FINISH: mark setup done, show the intro banner appropriate to the branch
+  function finishSetup(){
+    state.setupDone = true;
+    applyAll();
+    closeModal();
+    // reassuring intro banner — tailored to branch
+    const banner = $('introBanner');
+    if(state.branch){
+      banner.style.display='block';
+      if(state.branch==='new'){
+        $('introHi').textContent = `You've got an account${state.githubUsername?', @'+slugify(state.githubUsername):''} — now the fun part.`;
+        $('introMsg').innerHTML = `Take a breath: from here it's just <b>five small steps, top to bottom</b>. Your details are already filled in (the <span style="color:var(--green)">green text</span> in the prompts — click any of it to edit), each step opens as you go, and you can't break anything. Let's start by making your repository.`;
+      } else {
+        $('introHi').textContent = `All set — let's get your project up.`;
+        $('introMsg').innerHTML = `Everything below is filled in with your project details. The <span style="color:var(--green)">green text</span> in each prompt is editable — just click to change it. Go <b>top to bottom</b>, one step at a time. Start with making your repository.`;
+      }
+    }
+    // reveal tracker
+    $('tracker').style.display='block';
+    updateTracker();
+    // After a FRESH setup, start the user at the very top (Step 1), not wherever the page was scrolled.
+    // After an "edit my details" reopen, leave their scroll position alone.
+    if(!_modalEditMode){
+      const s1=$('s1');
+      if(s1 && !s1.classList.contains('open')) s1.classList.add('open');
+      // wait a tick for the modal's scroll-lock to release, then jump to top
+      setTimeout(()=>window.scrollTo(0,0), 60);
+    }
+  }
+
+  /* ════════ LIVE SLUG in modal ════════ */
+  const mProj=$('m_projname'), mSlug=$('modalSlug');
+  if(mProj){
+    mProj.addEventListener('input', ()=>{
+      const raw=mProj.value.trim();
+      if(!raw){ mSlug.textContent=''; return; }
+      const slug=slugify(raw);
+      mSlug.innerHTML = (slug===raw)? `On GitHub: <b>${slug}</b> ✓`
+        : `On GitHub this becomes: <b>${slug}</b> &nbsp;<span style="color:var(--ink3)">(spaces &amp; symbols auto-convert — totally normal)</span>`;
+    });
+  }
+
+  /* ════════ APPLY answers across guide ════════ */
+  function applyAll(){
+    deriveFeatures();
+    const slug = slugify(state.projectName) || 'your-project-name';
+    const user = state.githubUsername ? slugify(state.githubUsername) : 'your-username';
+
+    document.querySelectorAll('[data-proj]').forEach(el=>{
+      el.textContent = slug;
+      if(state.projectName) el.classList.add('is-filled');
+    });
+    document.querySelectorAll('.userfill[data-fill="githubUsername"]').forEach(el=>{
+      el.textContent = user;
+      if(state.githubUsername) el.classList.add('is-filled');
+    });
+    document.querySelectorAll('.fill[data-fill]').forEach(el=>{
+      const key = el.dataset.fill;
+      if(key==='projectName') return; // handled via data-proj
+      let val = state[key];
+      if(key==='githubUsername' && val) val = slugify(val); // keep usernames clean everywhere
+      if(val){ el.textContent = val; el.classList.add('is-filled'); }
+    });
+    document.querySelectorAll('.prompt').forEach(p=>{
+      const fills=[...p.querySelectorAll('.fill[data-fill]')];
+      if(fills.length && fills.every(f=>f.classList.contains('is-filled'))) p.classList.add('is-ready');
+      else p.classList.remove('is-ready');
+    });
+    // name pill
+    if(state.projectName){
+      const inp=$('projInput'); inp.value=state.projectName; lockNamePill(true);
+    }
+    // reflect into modal fields for edit mode
+    document.querySelectorAll('#modalOverlay [data-key]').forEach(inp=>{
+      const k=inp.dataset.key; if(state[k]) inp.value=state[k];
+    });
+    // restore step checkboxes
+    Object.keys(state.steps||{}).forEach(id=>{
+      const cb=$(id); if(cb){ cb.checked=state.steps[id]; cb.closest('.step')?.classList.toggle('done',state.steps[id]); }
+    });
+    makeEditable();
+  }
+
+  /* ════════ INLINE-EDIT values directly in the guide ════════ */
+  function commitEditable(el){
+    const txt = el.textContent.trim();
+    // ignore if it still equals the original placeholder (user clicked but didn't change)
+    if(el.dataset.orig!==undefined && txt===el.dataset.orig.trim()) return;
+    if(el.hasAttribute('data-proj')){
+      state.projectName = txt || state.projectName;
+      applyAll();
+    } else if(el.classList.contains('userfill')){
+      state.githubUsername = txt || state.githubUsername;
+      applyAll();
+    } else if(el.dataset.fill){
+      const key=el.dataset.fill;
+      if(txt) state[key] = txt;
+      if(/^feature[123]$/.test(key)){
+        state.featuresRaw = [state.feature1,state.feature2,state.feature3].filter(Boolean).join(', ');
+      }
+      applyAll();
+    } else {
+      // standalone .fill (e.g. a funding username) — self-contained, no propagation.
+      // mark it filled so applyAll() won't reset it, and remember the user's value.
+      if(txt){ el.classList.add('is-filled'); el.dataset.userEdited=txt; }
+    }
+  }
+  function makeEditable(){
+    // every .fill (whether state-backed via data-fill, or standalone like the funding usernames),
+    // plus project-name and username slots — but NOT the copyable extractor prompt inside the modal
+    document.querySelectorAll('.fill, [data-proj], .userfill').forEach(el=>{
+      if(el.dataset.editWired) return;
+      if(el.closest('#modalOverlay')) return; // modal's extractor prompt is copy-only, not edited in place
+      el.dataset.editWired='1';
+      el.classList.add('editable');
+      el.setAttribute('contenteditable','true');
+      el.setAttribute('spellcheck','false');
+      el.title='Click to edit';
+      el.addEventListener('focus', ()=>{
+        // if it's showing the original placeholder, select all so typing replaces it
+        if(el.dataset.orig!==undefined && el.textContent.trim()===el.dataset.orig.trim()){
+          const r=document.createRange(); r.selectNodeContents(el);
+          const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        }
+      });
+      el.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); el.blur(); } });
+      el.addEventListener('blur', ()=> commitEditable(el));
+    });
+  }
+
+  /* ════════ inject a "you can edit this" hint into every prompt with fillable values ════════ */
+  function injectEditHints(){
+    document.querySelectorAll('.prompt').forEach(p=>{
+      if(p.dataset.hintAdded) return;
+      const hasFills = p.querySelector('.fill[data-fill], [data-proj]');
+      if(!hasFills) return;
+      p.dataset.hintAdded='1';
+      const body = p.querySelector('.prompt-body');
+      if(!body) return;
+      const hint=document.createElement('div');
+      hint.className='prompt-edithint';
+      hint.innerHTML='<span class="peh-ico">✎</span><div><b>The highlighted bits are yours to fill or change</b> — click any of them right here to type your own. The <span style="color:var(--green);font-weight:700;">green</span> ones are already filled from your answers; <span style="color:var(--ink3);font-style:italic;">grey italic</span> ones are examples you can replace. <span class="peh-or">Or</span> just hit <b>Copy</b> and edit inside the AI instead.</div>';
+      body.parentNode.insertBefore(hint, body);
+    });
+  }
+
+  /* ════════ NAME PILL (editable, prefilled) ════════ */
+  const projInput=$('projInput'), slugPreview=$('slugPreview'), nameEditBtn=$('nameEditBtn');
+  function lockNamePill(locked){
+    if(locked){ projInput.readOnly=true; projInput.classList.add('locked'); nameEditBtn.textContent='✎ Change'; }
+    else { projInput.readOnly=false; projInput.classList.remove('locked'); projInput.focus(); nameEditBtn.textContent='✓ Done'; }
+  }
+  nameEditBtn.addEventListener('click', ()=>{
+    const wasLocked = projInput.readOnly;
+    if(wasLocked){
+      lockNamePill(false);            // unlock for editing
+    } else {
+      state.projectName = projInput.value.trim() || state.projectName;
+      lockNamePill(true);             // relock and commit
+      applyAll();
+    }
+  });
+  function updateProjName(){
+    const raw=projInput.value; const slug=slugify(raw)||'your-project-name';
+    state.projectName = raw.trim() || state.projectName;
+    document.querySelectorAll('[data-proj]').forEach(el=>{
+      el.textContent=slug;
+      if(raw.trim()) el.classList.add('is-filled'); else el.classList.remove('is-filled');
+    });
+    document.querySelectorAll('.prompt').forEach(p=>{
+      const fills=[...p.querySelectorAll('.fill[data-fill]')];
+      if(fills.length && fills.every(f=>f.classList.contains('is-filled'))) p.classList.add('is-ready');
+    });
+    if(raw.trim()===''){ slugPreview.classList.remove('show'); return; }
+    slugPreview.classList.add('show');
+    slugPreview.innerHTML = (slug!==raw.trim())
+      ? `On GitHub your name becomes: <b>${slug}</b><br><span style="color:var(--ink3)">(spaces and symbols are auto-converted — this is normal)</span>`
+      : `On GitHub: <b>${slug}</b> ✓ <span style="color:var(--ink3)">— clean, no changes needed</span>`;
+  }
+  projInput.addEventListener('input', updateProjName);
+
+  /* ════════ SMOOTH SCROLL (custom duration, header-aware) ════════ */
+  let _scrollAnim = null;
+  function smoothScrollTo(targetY, duration){
+    const startY = window.pageYOffset;
+    const diff = targetY - startY;
+    if(Math.abs(diff) < 4) return;
+    if(_scrollAnim) cancelAnimationFrame(_scrollAnim); // cancel any in-flight scroll so they don't fight
+    let start;
+    function ease(t){ return t<0.5 ? 2*t*t : 1-Math.pow(-2*t+2,2)/2; } // easeInOutQuad
+    function step(ts){
+      if(start===undefined) start=ts;
+      const elapsed = ts-start;
+      const t = Math.min(elapsed/duration, 1);
+      window.scrollTo(0, startY + diff*ease(t));
+      if(t<1){ _scrollAnim = requestAnimationFrame(step); }
+      else { _scrollAnim = null; }
+    }
+    _scrollAnim = requestAnimationFrame(step);
+  }
+  function scrollToElement(el, duration){
+    if(!el || !el.getBoundingClientRect) return;
+    const trackerH = (()=>{ const tr=$('tracker'); return (tr && tr.style.display!=='none') ? tr.offsetHeight : 0; })();
+    const rectTop = el.getBoundingClientRect().top + window.pageYOffset;
+    const margin = trackerH + 24; // clear the sticky tracker plus a little breathing room
+    smoothScrollTo(Math.max(rectTop - margin, 0), duration||900);
+  }
+
+  /* ════════ INLINE "ask AI" jump links ════════ */
+  document.querySelectorAll('[data-jump]').forEach(link=>{
+    link.addEventListener('click', e=>{
+      e.preventDefault();
+      const target=$(link.dataset.jump);
+      if(!target) return;
+      const step=target.closest('.step');
+      const stepWasClosed = step && !step.classList.contains('open');
+      if(stepWasClosed) step.classList.add('open');
+      // if the target is a collapsible AI drawer, open it
+      const isDrawer = target.tagName==='DETAILS';
+      const drawerWasClosed = isDrawer && !target.open;
+      if(isDrawer) target.open=true;
+      // wait for any expand (step and/or drawer) to settle before measuring + scrolling
+      const wait = (stepWasClosed || drawerWasClosed) ? 620 : 60;
+      setTimeout(()=>{
+        scrollToElement(target, 1300);
+        setTimeout(()=>{ target.classList.add('flash'); setTimeout(()=>target.classList.remove('flash'),1800); }, 350);
+      }, wait);
+    });
+  });
+
+  /* ════════ SUB-STEP "copied it, next" buttons ════════ */
+  document.querySelectorAll('.substep-next').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const target=$(btn.dataset.nextTo);
+      if(!target) return;
+      scrollToElement(target, 1100);
+      setTimeout(()=>{ target.classList.add('substep-flash'); setTimeout(()=>target.classList.remove('substep-flash'),1800); }, 300);
+    });
+  });
+
+  /* ════════ COPY BUTTONS ════════ */
+  function copyPrompt(btn){
+    const body = btn.closest('.prompt, .mini-extract').querySelector('.prompt-body, .me-body');
+    const text = body.innerText;
+    navigator.clipboard.writeText(text).then(()=>{
+      const orig=btn.textContent; btn.textContent='✓ Copied'; btn.classList.add('copied');
+      setTimeout(()=>{ btn.textContent=orig; btn.classList.remove('copied'); },1800);
+    }).catch(()=>{ btn.textContent='Press Ctrl+C'; setTimeout(()=>{btn.textContent='Copy';},1800); });
+  }
+
+  /* ════════ STEP OPEN ANIMATION ════════ */
+  function animateOpen(stepEl){
+    stepEl.classList.remove('just-opened');
+    void stepEl.offsetWidth; // reflow to restart animation
+    stepEl.classList.add('just-opened');
+    setTimeout(()=>stepEl.classList.remove('just-opened'), 2300);
+  }
+
+  /* ════════ glow the maintenance card (reminds users they're safe) ════════ */
+  function glowMaint(){
+    const fm=$('maintFloatBtn'); if(!fm) return;
+    fm.classList.remove('breathe','glow'); void fm.offsetWidth; fm.classList.add('glow');
+    setTimeout(()=>{ fm.classList.remove('glow'); fm.classList.add('breathe'); }, 2700);
+  }
+
+  /* ════════ STEP DONE TRACKING + PROGRESS ════════ */
+  const checks=[...document.querySelectorAll('.step-check')];
+  const stepEls=[...document.querySelectorAll('.wrap [data-step]')];
+  checks.forEach((cb,i)=>{
+    cb.addEventListener('change', ()=>{
+      state.steps[cb.id]=cb.checked;
+      const thisStep=cb.closest('.step');
+      thisStep.classList.toggle('done',cb.checked);
+      updateTracker();
+      // when ticked: keep this step open (no collapse — keeps layout stable),
+      // open the next one, and gently guide the user down to it.
+      if(cb.checked){
+        glowMaint(); // remind them the safety-net is there each time they finish a step
+        const myIndex=stepEls.indexOf(thisStep);
+        const next=stepEls[myIndex+1];
+        if(next){
+          const wasClosed = !next.classList.contains('open');
+          if(wasClosed) next.classList.add('open');
+          // Wait for the expand to finish (only if it was closed) before measuring + scrolling,
+          // so the target position is final and we don't overshoot.
+          setTimeout(()=>{
+            scrollToElement(next, 1300);  // measure + slow scroll on the settled, untransformed element
+            setTimeout(()=> animateOpen(next), 250); // THEN pulse, so the scale doesn't skew measurement
+          }, wasClosed ? 580 : 80);
+        }
+      }
+    });
+  });
+  function updateTracker(){
+    const total=checks.length;
+    const done=checks.filter(c=>c.checked).length;
+    $('trackerFill').style.width=(done/total*100)+'%';
+    const label = done===total ? `<b>All ${total} steps done! 🎉</b>` : `Progress: <b>${done}</b> / ${total} steps`;
+    $('trackerLabel').innerHTML = label;
+    const fp=$('floatProgress'); if(fp) fp.innerHTML = label;
+    $('completeCard').classList.toggle('show', done===total && total>0);
+    if(done===total && total>0) setTimeout(()=> scrollToElement($('completeCard'), 1300), 620);
+  }
+
+  /* ════════ KEYBOARD SHORTCUTS — Ctrl/Cmd + 1..6 toggles a step's done checkbox ════════ */
+  document.addEventListener('keydown', e=>{
+    // don't hijack typing in inputs, textareas, or editable fields
+    const t=e.target;
+    if(t && (t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable)) return;
+    if((e.ctrlKey||e.metaKey) && !e.shiftKey && !e.altKey && /^[1-6]$/.test(e.key)){
+      const i=parseInt(e.key,10)-1;
+      if(checks[i]){
+        e.preventDefault();
+        checks[i].checked=!checks[i].checked;
+        checks[i].dispatchEvent(new Event('change'));
+      }
+    }
+  });
+
+  /* ════════ TOC smooth-open ════════ */
+  document.querySelectorAll('.toc a').forEach(a=>{
+    a.addEventListener('click', ()=>{
+      const step=document.querySelector(a.getAttribute('href'));
+      if(step && !step.classList.contains('open')) step.classList.add('open');
+    });
+  });
+
+  /* ════════ MAINTENANCE BOX + MODAL ════════ */
+  const maintOverlay=$('maintOverlay');
+  function openMaint(){ maintOverlay.classList.add('show'); document.body.style.overflow='hidden'; }
+  function closeMaint(){ maintOverlay.classList.remove('show'); document.body.style.overflow=''; }
+  $('maintBox').addEventListener('click', openMaint);
+  $('maintFloatBtn').addEventListener('click', openMaint);
+  $('maintClose').addEventListener('click', closeMaint);
+  maintOverlay.addEventListener('click', e=>{
+    if(e.target===maintOverlay || e.target.closest('[data-maint-close]')) closeMaint();
+  });
+
+  /* ════════ FUNDING MODAL ════════ */
+  const fundOverlay=$('fundOverlay');
+  function openFund(){ fundOverlay.classList.add('show'); document.body.style.overflow='hidden'; }
+  function closeFund(){ fundOverlay.classList.remove('show'); document.body.style.overflow=''; }
+  $('fundFloatBtn').addEventListener('click', openFund);
+  $('fundClose').addEventListener('click', closeFund);
+  fundOverlay.addEventListener('click', e=>{
+    if(e.target===fundOverlay || e.target.closest('[data-fund-close]')) closeFund();
+  });
+
+  /* ════════ STUCK HELPER MODAL ════════ */
+  const stuckOverlay=$('stuckOverlay');
+  function openStuck(){ stuckOverlay.classList.add('show'); document.body.style.overflow='hidden'; }
+  function closeStuck(){ stuckOverlay.classList.remove('show'); document.body.style.overflow=''; }
+  $('stuckFloatBtn').addEventListener('click', openStuck);
+  $('stuckClose').addEventListener('click', closeStuck);
+  stuckOverlay.addEventListener('click', e=>{
+    if(e.target===stuckOverlay || e.target.closest('[data-stuck-close]')) closeStuck();
+  });
+
+  /* ════════ TOAST ════════ */
+  function toast(html){
+    const t=$('toast'); t.innerHTML=html; t.classList.add('show');
+    clearTimeout(t._timer); t._timer=setTimeout(()=>t.classList.remove('show'),3200);
+  }
+
+  /* ════════ SAVE PROGRESS (download self with embedded state) ════════ */
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function timestamp(){
+    const d=new Date();
+    return pad(d.getDate())+pad(d.getMonth()+1)+String(d.getFullYear()).slice(2)
+      +pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds());
+  }
+  function saveProgress(){
+    // sync latest field values
+    state.projectName = projInput.value.trim() || state.projectName;
+    // build a fresh copy of the current document with state injected
+    const clone = document.documentElement.cloneNode(true);
+    // remove any previous injected state
+    clone.querySelectorAll('#__savedState').forEach(n=>n.remove());
+    // empty the print sheet in the clone — it's rebuilt on demand, no need to bake it in
+    const cps=clone.querySelector('#printSheet'); if(cps) cps.innerHTML='';
+    // strip transient UI classes so it reopens clean, logic re-applies them
+    const script=clone.querySelector('script');
+    const stateScript = '<script id="__savedState">window.__RESTORE__='+
+      JSON.stringify(state).replace(/</g,'\\u003c')+';<\/script>';
+    let html='<!DOCTYPE html>\n'+clone.outerHTML;
+    // inject saved-state script just before the first <script>
+    html = html.replace('<script>', stateScript+'\n<script>');
+    const blob=new Blob([html],{type:'text/html'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='github-upload-guide-'+timestamp()+'.html';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+    toast('💾 Saved! Check your downloads for <b>'+a.download+'</b>. Reopen that file anytime to continue.');
+  }
+  $('saveBtn').addEventListener('click', saveProgress);
+
+  /* ════════ RESET TO DEFAULT ════════ */
+  function resetAll(){
+    if(!confirm('Start a fresh project?\n\nThis clears all your answers and ticks here so you can begin a new project from scratch.\n\nNote: this does NOT delete anything from your computer. Any file you downloaded earlier with "Save my progress" is still safe in your Downloads folder.')) return;
+    // wipe state
+    Object.assign(state,{branch:null,githubUsername:'',displayName:'',bio:'',projectName:'',
+      whatItDoes:'',targetUsers:'',featuresRaw:'',feature1:'',feature2:'',feature3:'',howUsed:'',setupDone:false,steps:{}});
+    // reset DOM — all .fill spans (state-backed AND standalone funding usernames)
+    document.querySelectorAll('.fill').forEach(el=>{
+      el.classList.remove('is-filled','editable');
+      el.removeAttribute('contenteditable'); delete el.dataset.editWired; delete el.dataset.userEdited;
+      if(el.dataset.orig!==undefined) el.textContent=el.dataset.orig;
+    });
+    document.querySelectorAll('[data-proj]').forEach(el=>{ el.textContent='your-project-name'; el.classList.remove('is-filled','editable'); el.removeAttribute('contenteditable'); delete el.dataset.editWired; });
+    document.querySelectorAll('.userfill').forEach(el=>{ el.textContent='your-username'; el.classList.remove('is-filled','editable'); el.removeAttribute('contenteditable'); delete el.dataset.editWired; });
+    document.querySelectorAll('.prompt').forEach(p=>p.classList.remove('is-ready'));
+    document.querySelectorAll('#modalOverlay [data-key]').forEach(i=>i.value='');
+    checks.forEach(c=>{ c.checked=false; c.closest('.step').classList.remove('done'); });
+    // collapse every step back to the initial state (only step 1 open), and clear any lingering animation
+    stepEls.forEach((s,i)=>{ s.classList.remove('open','just-opened'); });
+    const firstStep=$('s1'); if(firstStep) firstStep.classList.add('open');
+    updateTracker(); // refresh the float progress chip + tracker bar back to 0
+    projInput.value=''; projInput.readOnly=false; projInput.classList.remove('locked');
+    slugPreview.classList.remove('show');
+    $('introBanner').style.display='none';
+    $('tracker').style.display='none';
+    $('completeCard').classList.remove('show');
+    if(mSlug) mSlug.textContent='';
+    // jump back to the very top so the fresh start actually begins at the top, not where they left off
+    window.scrollTo(0,0);
+    toast('🔄 Cleared. Starting fresh!');
+    openModal(false);
+  }
+  // store original placeholder text of every editable spot (for reset + placeholder detection).
+  // Only set if absent, so a restored file keeps the TRUE original placeholders (not edited values).
+  document.querySelectorAll('.fill, [data-proj], .userfill').forEach(el=>{
+    if(el.dataset.orig===undefined) el.dataset.orig=el.textContent;
+  });
+
+  /* ════════ BOOT ════════ */
+  (function boot(){
+    injectEditHints(); // add the in-prompt "you can edit this" guidance everywhere
+    if(window.__RESTORE__){
+      // restore a saved session
+      Object.assign(state, window.__RESTORE__);
+      applyAll();
+      showFloatStack();
+      $('tracker').style.display='block';
+      updateTracker();
+      if(state.setupDone && state.branch){
+        const banner=$('introBanner'); banner.style.display='block';
+        $('introHi').textContent='Welcome back — picking up where you left off.';
+        $('introMsg').innerHTML='Your answers and progress are restored. Continue from wherever you stopped, top to bottom.';
+      }
+    } else {
+      makeEditable(); // make spots editable even before/without setup
+      openModal(false);
+    }
+  })();
+
+  // wire the floating "Start fresh" button
+  $('freshBtn').addEventListener('click', resetAll);
+
+  /* ════════ PRINTABLE CHECKLIST ════════ */
+  // key commands worth keeping on the printed sheet, by step id
+  const PRINT_KEYS = {
+    s1:['Repo name: '+ (slugify(state.projectName)||'your-project-name'), 'Visibility: Public', 'Tick "Add a README file"', 'License: MIT'],
+    s2:['Add file → Upload files → Commit changes'],
+    s3:['Edit README.md (pencil ✏️) → paste → Commit changes'],
+    s4:['Releases → Create new release → tag v1.0 → attach file → Publish'],
+    s5:['Add topic tags (gear ⚙️ by "About"), pin to profile, test in incognito']
+  };
+  function buildPrintSheet(){
+    const proj = state.projectName ? (slugify(state.projectName)) : 'your-project-name';
+    const total = checks.length;
+    const done = checks.filter(c=>c.checked).length;
+    let html = `<h1>GitHub Upload Checklist</h1>`;
+    html += `<div class="ps-sub">Putting "${proj}" on GitHub — a no-panic step-by-step</div>`;
+    html += `<div class="ps-meta">Progress: <b>${done} of ${total}</b> steps done · printed ${new Date().toLocaleDateString()}</div>`;
+    stepEls.forEach((stepEl,i)=>{
+      const titleEl = stepEl.querySelector('.step-title');
+      // title text without the optional badge / sub text
+      const titleClone = titleEl.cloneNode(true);
+      titleClone.querySelectorAll('small,.opt-badge').forEach(n=>n.remove());
+      const title = titleClone.textContent.trim();
+      const sub = titleEl.querySelector('small') ? titleEl.querySelector('small').textContent.trim() : '';
+      const isOpt = stepEl.classList.contains('is-optional');
+      const cb = stepEl.querySelector('.step-check');
+      const checked = cb && cb.checked;
+      html += `<div class="ps-step">`;
+      html += `<div class="ps-step-hd"><span class="ps-box ${checked?'checked':''}"></span>`;
+      html += `<span class="ps-num">Step ${i+1}.</span> ${title}`;
+      if(isOpt) html += ` <span class="ps-opt">optional</span>`;
+      html += `</div>`;
+      if(sub) html += `<div class="ps-sub2">${sub}</div>`;
+      const keys = PRINT_KEYS['s'+(i+1)];
+      if(keys) keys.forEach(k=>{ html += `<div class="ps-key">• ${k.replace(/`([^`]+)`/g,'<code>$1</code>')}</div>`; });
+      html += `</div>`;
+    });
+    html += `<div class="ps-step" style="border-style:dashed;"><div class="ps-step-hd"><span class="ps-box"></span>Optional extras <span class="ps-opt">any time</span></div><div class="ps-key">• Funding: GitHub Sponsors / Ko-fi / Liberapay + .github/FUNDING.yml, then Settings → Features → Sponsorships ON</div><div class="ps-key">• Maintenance: add / replace / delete files later — nothing is permanent</div></div>`;
+    html += `<div class="ps-foot">Tip: GitHub keeps a history of everything — you can add, replace, or delete files later without breaking anything. Your shareable link will be github.com/${state.githubUsername?slugify(state.githubUsername):'your-username'}/${proj}</div>`;
+    $('printSheet').innerHTML = html;
+  }
+  $('printBtn').addEventListener('click', ()=>{
+    buildPrintSheet();
+    toast('📋 Opening your printable checklist — choose "Save as PDF" in the print dialog to keep it.');
+    setTimeout(()=>window.print(), 300);
+  });
+</script>
+</body>
+</html>
