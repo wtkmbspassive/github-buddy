@@ -911,7 +911,7 @@ Keep it warm and plain, for a non-technical reader. Output only those five label
         <li>Make sure <span class="term">Commit directly to the main branch<span class="tip">A 'branch' is a version line of your project. 'main' is the default. For simple solo projects you always just use main.</span></span> is selected.</li>
         <li>Click <span class="btn-ref">Commit changes</span>.</li>
       </ol>
-      <div class="note"><span class="lbl" data-kind="info">Good to know<span class="note-skim">— info, no action needed</span></span>Your files now appear in the repo's file list. Uploading more later works the same way. <b>Need to replace or remove a file?</b> That's what the <span style="color:var(--blue)">🔧 Change a file later?</span> button (bottom-right) is for — ignore it for now.</div>
+      <div class="note"><span class="lbl" data-kind="info">Good to know<span class="note-skim">— info, no action needed</span></span>Your files now appear in the repo's file list. Uploading more later works the same way. <b>Need to add, replace, or remove a file?</b> That's what the <span style="color:var(--blue)">🔧 Add or change a file?</span> card (bottom-right) is for — ignore it for now.</div>
       <div class="step-done-row"><input type="checkbox" class="step-check" id="done2"><label for="done2">I've uploaded my file(s)</label></div>
     </div>
   </div>
@@ -926,11 +926,14 @@ Keep it warm and plain, for a non-technical reader. Output only those five label
     <div class="step-body">
       <p>The README is the most important text in your project — what visitors read first. A good one is the difference between "let me try it" and "I don't get it, bye." <a class="ai-inline" data-jump="ai-readme-drawer">✨ Open the README writer →</a></p>
       <ol>
-        <li>In your repo, click <code>README.md</code> in the file list.</li>
+        <li id="s3-start">In your repo, click <code>README.md</code> in the file list.</li>
         <li>Click the <span class="term">pencil icon ✏️<span class="tip">The pencil (top-right of the file view) means 'edit this file' right in your browser.</span></span> to edit.</li>
         <li>Select all the existing text and delete it.</li>
-        <li id="s3-paste">Paste in your new README (use the prompt below to write a great one).</li>
-        <li>Scroll down, write commit message <code>Add full README</code>, click <span class="btn-ref">Commit changes</span>.</li>
+        <li id="s3-paste">Paste in your new README (use the AI writer below if you haven't written one yet).</li>
+        <li>Top-right, click the green <span class="btn-ref">Commit changes…</span> button.</li>
+        <li><b>A popup appears.</b> You can leave the <span class="term">commit message<span class="tip">A short note describing what you changed — GitHub fills in a sensible default like "Update README.md". You can leave it as-is.</span></span> as its default (e.g. "Update README.md"), and leave the <b>Extended description</b> blank.</li>
+        <li>Make sure <span class="btn-ref">Commit directly to the <code>main</code> branch</span> is selected (it usually is).</li>
+        <li>Click the green <span class="btn-ref">Commit changes</span> button inside the popup to save.</li>
       </ol>
       <div class="note"><span class="lbl" data-kind="info">What's Markdown?<span class="note-skim">— info, no action needed</span></span>READMEs use <span class="term">Markdown<span class="tip"># makes a heading, **text** makes bold, - makes a bullet. GitHub turns it into nice formatting. The AI prompt writes it for you.</span></span>, a simple formatting style. You don't need to learn it — the prompt below writes it for you.</div>
 
@@ -957,7 +960,7 @@ How people use it: <span class="fill" data-fill="howUsed">[e.g. download the fil
 
 Please include: a short intro, a features list, simple step-by-step usage instructions, a privacy/disclaimer note if relevant, and a friendly closing. Keep the tone warm and plain — assume the reader is not technical. Output only the Markdown, nothing else.</div>
           </div>
-          <button class="substep-next" data-next-to="s3-paste">Copied my README ✓ &nbsp;Next: paste &amp; commit →</button>
+          <button class="substep-next" data-next-to="s3-start">Copied my README ✓ &nbsp;Next: open &amp; edit README.md →</button>
         </div>
       </details>
       <div class="step-done-row"><input type="checkbox" class="step-check" id="done3"><label for="done3">My README is written</label></div>
@@ -982,13 +985,30 @@ Please include: a short intro, a features list, simple step-by-step usage instru
       <ol>
         <li>On your repo's main page, find <span class="btn-ref">Releases</span> in the right sidebar → <span class="btn-ref">Create a new release</span>.</li>
         <li>Click <span class="term">Choose a tag<span class="tip">A 'tag' is a version label like v1.0. Type 'v1.0' and click 'Create new tag'. Future updates would be v1.1, v2.0, etc.</span></span> → type <code>v1.0</code> → confirm "Create new tag."</li>
-        <li><b>Release title:</b> something like <code>v1.0 — First release</code>.</li>
-        <li><b>Describe this release:</b> a few sentences on what it is and how to use it.</li>
+        <li id="s4-title"><b>Release title:</b> something like <code>v1.0 — First release</code>. <a class="ai-inline" data-jump="ai-release-drawer">✨ Let AI write the title & notes →</a></li>
+        <li><b>Describe this release:</b> a few sentences on what it is and how to use it (the AI helper below writes this for you).</li>
         <li><b>Attach your file:</b> drag your downloadable file into the <span class="term">"Attach binaries"<span class="tip">'Binaries' just means 'files for download' here. Dragging your file here attaches it as a clean, directly-downloadable asset — the file people click to get.</span></span> zone near the bottom.</li>
-        <li>Leave the label as <span class="btn-ref">None</span> (not pre-release).</li>
-        <li>Click <span class="btn-ref">Publish release</span>.</li>
+        <li>Leave <span class="term">"Set as a pre-release"<span class="tip">A checkbox near the bottom. 'Pre-release' means a test/beta version. Leave it UNticked so this counts as a normal, finished release.</span></span> <b>unticked</b>. If you see <span class="btn-ref">Set as the latest release</span>, you can tick it (it's usually on by default for your first release).</li>
+        <li>Click the green <span class="btn-ref">Publish release</span> button.</li>
       </ol>
       <div class="note tip"><span class="lbl" data-kind="safe">Now it's easy for everyone<span class="note-skim">— just so you know</span></span>Your release page shows your file under "Assets" with a download link. In your README you can link to <code>github.com/<span class="userfill" data-fill="githubUsername">your-username</span>/<span data-proj>your-project-name</span>/releases/latest</code> so people always get the newest version.</div>
+
+      <details class="ai-drawer" id="ai-release-drawer">
+        <summary><span class="ad-spark">✨</span> Not sure what to write? Let AI do the title &amp; notes <span class="ad-hint">(tap to open)</span><span class="ad-chev">▸</span></summary>
+        <div class="ai-drawer-body">
+          <p>Copy this into any AI — it writes both the <b>Release title</b> and the <b>"Describe this release"</b> notes, ready to paste into the two boxes on GitHub:</p>
+          <div class="attach-flag" data-attach><span class="af-ico">📎</span><div><b>Attach your project file</b> for notes that match what your project actually does.</div></div>
+          <div class="prompt" id="p-release">
+            <div class="prompt-hdr"><span>📋 Release notes writer <span class="ready-badge">✓ Pre-filled</span></span><button class="copy-btn" onclick="copyPrompt(this)">Copy</button></div>
+            <div class="prompt-body">I'm publishing version 1.0 of my GitHub project "<span class="fill" data-proj data-fill="projectName">your-project-name</span>" — its first release. Here's what it does: <span class="fill" data-fill="whatItDoes">[paste your project file here, or describe it]</span>. Write me two things, clearly labelled:
+
+1. A short Release title (under 50 characters), like "v1.0 — First release".
+2. Friendly "Describe this release" notes for a non-technical reader: a 1-2 sentence intro of what this is, a short bulleted list of what it does, and one line on how to use the downloaded file. Keep it warm and plain. Output the notes in Markdown.</div>
+          </div>
+          <button class="substep-next" data-next-to="s4-title">Copied my title &amp; notes ✓ &nbsp;Next: paste them in →</button>
+        </div>
+      </details>
+
       <div class="step-done-row"><input type="checkbox" class="step-check" id="done4"><label for="done4">I've published a release</label></div>
     </div>
   </div>
@@ -1800,10 +1820,10 @@ patreon: <span class="fill">yourname</span></div>
   /* ════════ PRINTABLE CHECKLIST ════════ */
   // key commands worth keeping on the printed sheet, by step id
   const PRINT_KEYS = {
-    s1:['Repo name: '+ (slugify(state.projectName)||'your-project-name'), 'Visibility: Public', 'Tick "Add a README file"', 'License: MIT'],
-    s2:['Add file → Upload files → Commit changes'],
-    s3:['Edit README.md (pencil ✏️) → paste → Commit changes'],
-    s4:['Releases → Create new release → tag v1.0 → attach file → Publish'],
+    s1:['Repo name: '+ (slugify(state.projectName)||'your-project-name'), 'Visibility: Public', 'Tick "Add a README file"', '.gitignore: leave as "No .gitignore"', 'License: MIT'],
+    s2:['Add file → Upload files → write a message → Commit changes'],
+    s3:['Click README.md → pencil ✏️ → delete old text → paste new → green "Commit changes…" → confirm in popup'],
+    s4:['Releases → Create a new release → tag v1.0 → attach file → leave pre-release unticked → Publish release'],
     s5:['Add topic tags (gear ⚙️ by "About"), pin to profile, test in incognito']
   };
   function buildPrintSheet(){
