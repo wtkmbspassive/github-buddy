@@ -1,5 +1,5 @@
 GitHub Buddy
-The hand‑holding, no‑panic guide to putting your first project on GitHub.
+The hand‑holding, no‑panic guide to putting your first project(s) on GitHub.
 
 You have something you want to share — a tool, a doc, a little thing you built. But GitHub looks like it was made for programmers who already know the secret handshake. GitHub Buddy fixes that.
 It walks you through every step, explains every confusing word the moment it appears, and holds your hand the whole way. No jargon. No shame. Just click, read, and go.
